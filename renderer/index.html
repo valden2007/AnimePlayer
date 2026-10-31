@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnimePlayer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo" id="logo">AnimePlayer</div>
+    <div class="searchbox">
+      <input id="searchInput" type="text" placeholder="Поиск аниме на русском..." autocomplete="off">
+      <div id="searchSuggestions" class="suggestions hidden"></div>
+    </div>
+    <select id="providerSelect" title="Источник"></select>
+    <button id="favBtn" class="iconbtn" title="Избранное">★</button>
+    <button id="contBtn" class="iconbtn" title="Продолжить просмотр">▶</button>
+    <button id="settingsBtn" class="iconbtn" title="Настройки">⚙</button>
+  </header>
+
+  <main id="app">
+    <section id="viewHome" class="view">
+      <div class="filters">
+        <select id="genreFilter"><option value="">Все жанры</option></select>
+        <select id="yearFromFilter"><option value="">Год от</option></select>
+        <select id="yearToFilter"><option value="">Год до</option></select>
+        <select id="statusFilter">
+          <option value="all">Выходит и вышло</option>
+          <option value="ongoing">Выходит</option>
+          <option value="released">Вышло</option>
+          <option value="anons">Анонсы</option>
+        </select>
+        <select id="sortFilter">
+          <option value="FRESH_AT_DESC">По дате (новые)</option>
+          <option value="RATING_DESC">По рейтингу</option>
+          <option value="FAVORITES_DESC">По избранному</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="onlyStreamFilter"> Только с просмотром</label>
+        <button id="resetFilters">Сбросить</button>
+      </div>
+
+      <div id="newestSection">
+        <h2>Новинки</h2>
+        <div id="newestGrid" class="grid skeleton-grid"></div>
+      </div>
+      <div id="popularSection">
+        <h2>Популярное</h2>
+        <div id="popularGrid" class="grid skeleton-grid"></div>
+      </div>
+
+      <div id="resultsSection" class="hidden">
+        <h2>Результаты <span id="resultsCount" class="muted"></span></h2>
+        <div id="resultsGrid" class="grid"></div>
+        <div id="resultsEmpty" class="empty hidden">Ничего не найдено по выбранным фильтрам</div>
+        <div class="loadmore-wrap">
+          <button id="loadMoreBtn" class="hidden">Показать ещё</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="viewSearch" class="view hidden">
+      <h2 id="searchTitle">Результаты поиска</h2>
+      <div id="searchGrid" class="grid"></div>
+      <div id="searchEmpty" class="empty hidden">Ничего не найдено</div>
+    </section>
+
+    <section id="viewTitle" class="view hidden">
+      <button id="backBtn" class="backbtn">← Назад</button>
+      <div class="title-layout">
+        <img id="titlePoster" class="poster" src="" alt="">
+        <div class="title-info">
+          <h1 id="titleName"></h1>
+          <div class="meta" id="titleMeta"></div>
+          <div class="genres" id="titleGenres"></div>
+          <p id="titleDesc"></p>
+          <div class="actions">
+            <select id="statusSelect">
+              <option value="">Статус</option>
+              <option value="watching">Смотрю</option>
+              <option value="planned">В планах</option>
+              <option value="completed">Просмотрено</option>
+              <option value="on_hold">Отложено</option>
+            </select>
+            <button id="favStar">☆</button>
+          </div>
+        </div>
+      </div>
+      <h2>Эпизоды</h2>
+      <div id="episodesList" class="episodes"></div>
+    </section>
+
+    <section id="viewPlayer" class="view hidden">
+      <button id="backFromPlayer" class="backbtn">← К тайтлу</button>
+      <div class="player-wrap" id="playerWrap">
+        <video id="video" playsinline></video>
+        <iframe id="iframePlayer" class="hidden" allowfullscreen></iframe>
+        <canvas id="upscaleCanvas" class="hidden"></canvas>
+        <div class="play-icon hidden" id="playIcon">▶</div>
+        <button id="skipBtn" class="skip-btn hidden">Пропустить</button>
+        <div class="controls" id="controlsBar">
+          <button id="playPause">▶</button>
+          <input id="seek" type="range" min="0" max="100" value="0" step="0.1">
+          <span id="time">0:00 / 0:00</span>
+          <input id="volume" type="range" min="0" max="1" step="0.05" value="1">
+          <button id="muteBtn">🔊</button>
+          <select id="qualitySelect"></select>
+          <select id="upscaleSelect">
+            <option value="off">Улучшение: выкл</option>
+            <option value="light">Улучшение: лёгкий</option>
+            <option value="strong">Улучшение: сильный</option>
+          </select>
+          <button id="nextEpBtn">След. серия</button>
+          <button id="fsBtn">⛶</button>
+        </div>
+      </div>
+      <div class="ep-nav">
+        <button id="prevEp">◀ Пред.</button>
+        <span id="epLabel"></span>
+        <button id="nextEp">След. ▶</button>
+      </div>
+    </section>
+
+    <section id="viewLibrary" class="view hidden">
+      <button id="backFromLib" class="backbtn">← Назад</button>
+      <h2>Моя библиотека</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="all">Все</button>
+        <button class="tab" data-tab="watching">Смотрю</button>
+        <button class="tab" data-tab="planned">В планах</button>
+        <button class="tab" data-tab="completed">Просмотрено</button>
+        <button class="tab" data-tab="on_hold">Отложено</button>
+        <button class="tab" data-tab="favorite">Избранное</button>
+      </div>
+      <div class="filters">
+        <input id="libSearch" type="text" placeholder="Поиск в библиотеке">
+        <select id="libSort">
+          <option value="added">По дате добавления</option>
+          <option value="name">По названию</option>
+        </select>
+      </div>
+      <div id="libGrid" class="grid"></div>
+      <h2>Продолжить просмотр</h2>
+      <div id="contGrid" class="grid"></div>
+      <h2>История поиска</h2>
+      <div id="historyList" class="history"></div>
+    </section>
+  </main>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Настройки</h3>
+      <button id="diagSourcesBtn">Проверить источники</button>
+      <div class="row">
+        <button id="exportLibBtn">Экспорт JSON</button>
+        <button id="importLibBtn">Импорт JSON</button>
+        <input id="importLibFile" type="file" accept="application/json" class="hidden">
+      </div>
+      <pre id="diagOutput" class="diag-output"></pre>
+      <div class="row">
+        <button id="copyDiagBtn">Копировать отчёт</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="autoSkipOpening"> Автоматически пропускать опенинг</label>
+      <label class="chk"><input type="checkbox" id="autoSkipEnding"> Автоматически пропускать эндинг</label>
+      <label class="chk"><input type="checkbox" id="autoNextAfterEnding" checked> Автопереход после эндинга</label>
+      <label>Пропуск по умолчанию (сек)</label>
+      <input id="skipSecondsInput" type="number" value="85" min="10" max="300">
+      <p class="muted small">Токен хранится локально. Без токена доступна только AniLibria.</p>
+      <div class="muted small" id="indexInfo">Индекс AniLibria: загрузка...</div>
+      <button id="closeSettingsBtn">Закрыть</button>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden"></div>
+  <div class="build-info">v1.4.0 · build 2026-10-31 19:30</div>
+
+  <script src="vendor/hls.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
