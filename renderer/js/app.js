@@ -88,7 +88,7 @@ const App = {
       }
     });
     // filters auto-apply
-    ['genreFilter','yearFromFilter','yearToFilter','statusFilter','sortFilter','onlyStreamFilter'].forEach(id => {
+    ['genreFilter','yearFromFilter','yearToFilter','statusFilter','typeFilter','ratingFilter','sortFilter','onlyStreamFilter'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', () => this.scheduleFilterApply());
     });
@@ -221,6 +221,9 @@ const App = {
     document.getElementById('yearFromFilter').value = '';
     document.getElementById('yearToFilter').value = '';
     document.getElementById('statusFilter').value = 'all';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('ratingFilter').value = '';
+    document.getElementById('onlyStreamFilter').checked = false;
     document.getElementById('sortFilter').value = 'FRESH_AT_DESC';
     this.loadHome();
   },
@@ -229,7 +232,10 @@ const App = {
     return !!(document.getElementById('genreFilter').value ||
       document.getElementById('yearFromFilter').value ||
       document.getElementById('yearToFilter').value ||
-      document.getElementById('statusFilter').value !== 'all');
+      document.getElementById('statusFilter').value !== 'all' ||
+      document.getElementById('typeFilter').value ||
+      document.getElementById('ratingFilter').value ||
+      document.getElementById('onlyStreamFilter').checked);
   },
 
   showView(name) {
@@ -310,6 +316,10 @@ const App = {
       const st = document.getElementById('statusFilter').value;
       if (st && st !== 'all') opts.status = st;
       else opts.status = 'all';
+      const tp = document.getElementById('typeFilter').value;
+      if (tp) opts.type = tp;
+      const rt = document.getElementById('ratingFilter').value;
+      if (rt) opts.rating = Number(rt);
       opts.onlyWithStream = document.getElementById('onlyStreamFilter').checked;
 
       try {
@@ -344,6 +354,10 @@ const App = {
     const st = document.getElementById('statusFilter').value;
     if (st && st !== 'all') opts.status = st;
     else opts.status = 'all';
+    const tp = document.getElementById('typeFilter').value;
+    if (tp) opts.type = tp;
+    const rt = document.getElementById('ratingFilter').value;
+    if (rt) opts.rating = Number(rt);
     opts.onlyWithStream = document.getElementById('onlyStreamFilter').checked;
     const btn = document.getElementById('loadMoreBtn');
     btn.disabled = true; btn.textContent = 'Загрузка...';

@@ -134,7 +134,13 @@ class AniLibriaProvider extends BaseProvider {
     if (opts.status === 'released') q.push('f[publish_statuses]=IS_NOT_ONGOING');
     const url = `${API}/anime/catalog/releases?${params.toString()}${q.length ? '&' + q.join('&') : ''}`;
     const data = await this._fetch(url);
-    const arr = Array.isArray(data) ? data : (data?.data || data?.items || data?.releases || []);
+    let arr = Array.isArray(data) ? data : (data?.data || data?.items || data?.releases || []);
+    if (opts.rating) {
+      arr = arr.filter(r => {
+        const rt = r.shikimori?.rating || r.mal?.rating || r.rating?.average;
+        return !rt || Number(rt) >= opts.rating;
+      });
+    }
     return arr.map(normalizeTitle);
   }
 

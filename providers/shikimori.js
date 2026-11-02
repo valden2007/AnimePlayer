@@ -71,7 +71,8 @@ class ShikimoriProvider extends BaseProvider {
     params.set('limit', String(opts.limit || 20));
     if (opts.page) params.set('page', opts.page);
     // kind tv by default
-    params.set('kind', 'tv,movie,ova,ona,special');
+    if (opts.type) params.set('kind', opts.type.toLowerCase());
+    else params.set('kind', 'tv,movie,ova,ona,special');
     if (opts.search) params.set('search', opts.search);
     if (opts.genres && opts.genres.length) params.set('genre', opts.genres.join(','));
     if (opts.yearFrom && opts.yearTo) params.set('season', `${opts.yearFrom}_${opts.yearTo}`);
@@ -83,7 +84,10 @@ class ShikimoriProvider extends BaseProvider {
     else params.set('status', 'ongoing,released');
     const url = `${BASE}/api/animes?${params.toString()}`;
     const data = await this._fetch(url);
-    const arr = Array.isArray(data) ? data : (data?.animes || []);
+    let arr = Array.isArray(data) ? data : (data?.animes || []);
+    if (opts.rating) {
+      arr = arr.filter(r => !r.score || Number(r.score) >= opts.rating);
+    }
     return arr.map(normalizeTitle);
   }
 
