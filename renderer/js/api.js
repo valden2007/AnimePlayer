@@ -15,6 +15,8 @@ const API = {
   async indexInfo() { return window.api.getIndexInfo(); },
   async library() { return window.api.getLibrary(); },
   async saveLibrary(data) { return window.api.setLibrary(data); },
+  async backupLibrary() { return window.api.backupLibrary(); },
+  async restoreLibrary() { return window.api.restoreLibrary(); },
   async catalog(provider, opts) { return window.api.getCatalog(provider, opts); },
   async genres(provider) { return window.api.getGenres(provider); },
   async years(provider) { return window.api.getYears(provider); }

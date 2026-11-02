@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('api', {
   getIndexInfo: () => ipcRenderer.invoke('getIndexInfo'),
   getLibrary: () => ipcRenderer.invoke('getLibrary'),
   setLibrary: (data) => ipcRenderer.invoke('setLibrary', data),
+  backupLibrary: () => ipcRenderer.invoke('backupLibrary'),
+  restoreLibrary: () => ipcRenderer.invoke('restoreLibrary'),
   getCatalog: (provider, opts) => ipcRenderer.invoke('getCatalog', { provider, opts }),
   getGenres: (provider) => ipcRenderer.invoke('getGenres', { provider }),
   getYears: (provider) => ipcRenderer.invoke('getYears', { provider }),

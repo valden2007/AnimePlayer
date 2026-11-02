@@ -16,6 +16,24 @@ function writeLibrary(data) {
   fs.renameSync(tmp, f);
 }
 
+function backupLibraryFile() {
+  const f = libraryFile();
+  const backup = path.join(app.getPath('userData'), 'library_backup.json');
+  if (fs.existsSync(f)) {
+    fs.copyFileSync(f, backup);
+  }
+}
+
+function restoreLibraryFile() {
+  const f = libraryFile();
+  const backup = path.join(app.getPath('userData'), 'library_backup.json');
+  if (fs.existsSync(backup)) {
+    fs.copyFileSync(backup, f);
+    return true;
+  }
+  return false;
+}
+
 let mainWindow = null;
 let providers = null;
 
@@ -64,6 +82,8 @@ function registerIpc() {
   ipcMain.handle('getIndexInfo', async () => providers.getIndexInfo());
   ipcMain.handle('getLibrary', async () => readLibrary());
   ipcMain.handle('setLibrary', async (_e, data) => { writeLibrary(data); return { ok: true }; });
+  ipcMain.handle('backupLibrary', async () => { backupLibraryFile(); return { ok: true }; });
+  ipcMain.handle('restoreLibrary', async () => { const ok = restoreLibraryFile(); return { ok }; });
   ipcMain.handle('diagSources', async (_e, { title }) => {
     const test = title || 'Атака титанов';
     const results = [];
@@ -118,6 +138,18 @@ app.whenReady().then(async () => {
   providers = new ProviderManager(app.getPath('userData'));
   registerIpc();
   createWindow();
+
+  // auto-backup library once per day
+  const backup = path.join(app.getPath('userData'), 'library_backup.json');
+  const lib = path.join(app.getPath('userData'), 'library.json');
+  let needBackup = true;
+  if (fs.existsSync(backup)) {
+    const age = Date.now() - fs.statSync(backup).mtimeMs;
+    if (age < 24 * 60 * 60 * 1000) needBackup = false;
+  }
+  if (needBackup && fs.existsSync(lib)) {
+    try { fs.copyFileSync(lib, backup); } catch {}
+  }
 
   // auto-updater (only in packaged app)
   autoUpdater.autoDownload = true;

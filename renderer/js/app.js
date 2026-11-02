@@ -882,6 +882,22 @@ const App = {
         this.renderLibrary();
       } catch { showToast('Ошибка импорта'); }
     };
+    document.getElementById('backupLibBtn').onclick = async () => {
+      await API.backupLibrary();
+      showToast('Бэкап создан');
+    };
+    document.getElementById('restoreLibBtn').onclick = async () => {
+      const r = await API.restoreLibrary();
+      if (r.ok) {
+        this.state.library = await API.library();
+        if (!this.state.library.items) this.state.library.items = {};
+        if (!this.state.library.collections) this.state.library.collections = {};
+        this.renderLibrary();
+        showToast('Восстановлено');
+      } else {
+        showToast('Бэкап не найден');
+      }
+    };
   },
 
   renderStats() {
