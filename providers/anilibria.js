@@ -49,6 +49,10 @@ function normalizeEpisode(e, releaseId) {
   };
 }
 
+/**
+ * AniLibria API provider.
+ * @extends BaseProvider
+ */
 class AniLibriaProvider extends BaseProvider {
   constructor() { super('anilibria', 'AniLibria'); }
 
@@ -60,6 +64,12 @@ class AniLibriaProvider extends BaseProvider {
     });
   }
 
+  /**
+   * Search titles.
+   * @param {string} query - Search query.
+   * @param {number} [page] - Page number.
+   * @returns {Promise<Array>} Normalized titles.
+   */
   async search(query, page = 1) {
     const url = `${API}/app/search/releases?query=${encodeURIComponent(query)}`;
     const data = await this._fetch(url);
@@ -67,11 +77,21 @@ class AniLibriaProvider extends BaseProvider {
     return list.map(normalizeTitle);
   }
 
+  /**
+   * Get title details.
+   * @param {string|number} id - Title id.
+   * @returns {Promise<Object>} Normalized title.
+   */
   async getTitle(id) {
     const data = await this._fetch(`${API}/anime/releases/${encodeURIComponent(id)}`);
     return normalizeTitle(data);
   }
 
+  /**
+   * Get episodes for a title.
+   * @param {string|number} id - Title id.
+   * @returns {Promise<Array>} Normalized episodes.
+   */
   async getEpisodes(id) {
     const data = await this._fetch(`${API}/anime/releases/${encodeURIComponent(id)}`);
     const eps = Array.isArray(data.episodes) ? data.episodes : [];
@@ -90,6 +110,11 @@ class AniLibriaProvider extends BaseProvider {
     return data.hls_720 || data.hls_1080 || data.hls_480 || null;
   }
 
+  /**
+   * Get catalog.
+   * @param {Object} [opts] - Catalog options.
+   * @returns {Promise<Array>} Normalized titles.
+   */
   async getCatalog(opts = {}) {
     const params = new URLSearchParams();
     if (opts.page) params.set('page', opts.page);
@@ -113,12 +138,20 @@ class AniLibriaProvider extends BaseProvider {
     return arr.map(normalizeTitle);
   }
 
+  /**
+   * Get genres.
+   * @returns {Promise<Array>} Genres list.
+   */
   async getGenres() {
     const data = await this._fetch(`${API}/anime/catalog/references/genres`);
     const arr = Array.isArray(data) ? data : (data?.data || []);
     return arr.map(g => ({ id: g.id, name: g.name || g.label }));
   }
 
+  /**
+   * Get years range.
+   * @returns {Promise<Array<number>>} Years list.
+   */
   async getYears() {
     const cur = new Date().getFullYear();
     const out = [];

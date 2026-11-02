@@ -2,6 +2,10 @@ const { AniLibriaProvider } = require('./anilibria');
 const { ShikimoriProvider } = require('./shikimori');
 const { AniLibriaIndexer } = require('./indexer');
 
+/**
+ * Manages data providers with automatic fallback.
+ * @param {string} [userDataPath] - Path to user data directory for caching.
+ */
 class ProviderManager {
   constructor(userDataPath) {
     this.providers = [new AniLibriaProvider(), new ShikimoriProvider()];
@@ -9,8 +13,18 @@ class ProviderManager {
     setTimeout(() => this.indexer.ensure().catch(() => {}), 5000);
   }
 
+  /**
+   * Get index info.
+   * @returns {{ready: boolean, indexCount: number, apiTotal: number}}
+   */
   getIndexInfo() { return { ready: this.indexer.ready, indexCount: this.indexer.entries.length, apiTotal: this.indexer.apiTotal }; }
 
+  /**
+   * Get similar titles.
+   * @param {string|null} providerId - Preferred provider id.
+   * @param {string|number} id - Title id.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async getSimilar(providerId, id) {
     const errs = [];
     for (const p of this._order(providerId)) {
@@ -30,6 +44,13 @@ class ProviderManager {
   }
   _get(id) { return this.providers.find(p => p.id === id) || this.providers[0]; }
 
+  /**
+   * Search across providers with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @param {string} query - Search query.
+   * @param {number} [page] - Page number.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async search(preferredId, query, page) {
     const errs = [];
     for (const p of this._order(preferredId)) {
@@ -41,6 +62,12 @@ class ProviderManager {
     throw new Error('Поиск недоступен. ' + errs.join(' | '));
   }
 
+  /**
+   * Get title details with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @param {string|number} id - Title id.
+   * @returns {Promise<{provider: string, data: Object}>}
+   */
   async getTitle(preferredId, id) {
     const errs = [];
     for (const p of this._order(preferredId)) {
@@ -52,6 +79,12 @@ class ProviderManager {
     throw new Error('Не удалось получить тайтл. ' + errs.join(' | '));
   }
 
+  /**
+   * Get episodes with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @param {string|number} id - Title id.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async getEpisodes(preferredId, id) {
     const errs = [];
     for (const p of this._order(preferredId)) {
@@ -63,6 +96,12 @@ class ProviderManager {
     throw new Error('Не удалось получить эпизоды. ' + errs.join(' | '));
   }
 
+  /**
+   * Get catalog with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @param {Object} [opts] - Catalog options.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async getCatalog(preferredId, opts) {
     const errs = [];
     for (const p of this._order(preferredId)) {
@@ -85,6 +124,11 @@ class ProviderManager {
     throw new Error('Каталог недоступен. ' + errs.join(' | '));
   }
 
+  /**
+   * Get genres with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async getGenres(preferredId) {
     const errs = [];
     for (const p of this._order(preferredId)) {
@@ -96,6 +140,11 @@ class ProviderManager {
     throw new Error('Жанры недоступны. ' + errs.join(' | '));
   }
 
+  /**
+   * Get years with fallback.
+   * @param {string|null} preferredId - Preferred provider id.
+   * @returns {Promise<{provider: string, data: Array}>}
+   */
   async getYears(preferredId) {
     const errs = [];
     for (const p of this._order(preferredId)) {

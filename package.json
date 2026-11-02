@@ -5,7 +5,8 @@
   "main": "main/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win portable",
+    "build": "electron-builder --win portable --publish=never",
+    "build:packager": "electron-packager . AnimePlayer --platform=win32 --arch=x64 --out=dist-packager --overwrite",
     "test": "node --test tests/unit/*.test.js"
   },
   "build": {
@@ -24,7 +25,8 @@
     "win": {
       "target": "portable",
       "icon": "assets/icon.ico",
-      "sign": false
+      "sign": false,
+      "signAndEditExecutable": false
     },
     "publish": {
       "provider": "github",
@@ -39,6 +41,7 @@
   "devDependencies": {
     "electron": "^33.4.11",
     "electron-builder": "^25.0.0",
+    "electron-packager": "^17.1.2",
     "playwright": "^1.64.1"
   },
   "author": "AnimePlayer"

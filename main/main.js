@@ -19,6 +19,9 @@ function writeLibrary(data) {
 let mainWindow = null;
 let providers = null;
 
+/**
+ * Create main application window.
+ */
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -45,6 +48,9 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
+/**
+ * Register IPC handlers.
+ */
 function registerIpc() {
   ipcMain.handle('providers:list', () => providers.list());
   ipcMain.handle('search', async (_e, { provider, query, page }) => providers.search(provider, query, page));
