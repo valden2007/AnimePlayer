@@ -26,7 +26,7 @@ const App = {
   },
 
   async init() {
-    console.log('App.init started');
+    this.applyTheme();
     Player.init();
     const list = await API.providers();
     const sel = document.getElementById('providerSelect');
@@ -773,8 +773,22 @@ const App = {
     if (favStar) favStar.textContent = (item && item.favorite) ? '★' : '☆';
   },
 
+  applyTheme() {
+    const theme = Storage.settings().theme || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  },
+
   openSettings() {
     const modal = document.getElementById('settingsModal');
+    const themeSel = document.getElementById('themeSelect');
+    if (themeSel) {
+      themeSel.value = Storage.settings().theme || 'dark';
+      themeSel.onchange = () => {
+        const t = themeSel.value;
+        Storage.setSettings(Object.assign(Storage.settings(), { theme: t }));
+        this.applyTheme();
+      };
+    }
     modal.classList.remove('hidden');
     const firstInput = modal.querySelector('input, button, select');
     if (firstInput) firstInput.focus();
