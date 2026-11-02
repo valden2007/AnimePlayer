@@ -15,7 +15,7 @@
       <div id="searchSuggestions" class="suggestions hidden"></div>
     </div>
     <select id="providerSelect" title="Источник"></select>
-    <button id="libBtn" class="iconbtn" title="Моя библиотека">📚 Библиотека</button>
+    <button id="libBtn" class="iconbtn" title="Моя библиотека" aria-label="Открыть библиотеку">📚 Библиотека</button>
     <button id="contBtn" class="iconbtn" title="Продолжить просмотр">▶</button>
     <button id="settingsBtn" class="iconbtn" title="Настройки">⚙</button>
   </header>
@@ -105,11 +105,11 @@
         <div class="play-icon hidden" id="playIcon">▶</div>
         <button id="skipBtn" class="skip-btn hidden">Пропустить</button>
         <div class="controls" id="controlsBar">
-          <button id="playPause">▶</button>
+          <button id="playPause" aria-label="Воспроизведение/пауза">▶</button>
           <input id="seek" type="range" min="0" max="100" value="0" step="0.1">
           <span id="time">0:00 / 0:00</span>
           <input id="volume" type="range" min="0" max="1" step="0.05" value="1">
-          <button id="muteBtn">🔊</button>
+          <button id="muteBtn" aria-label="Звук">🔊</button>
           <select id="qualitySelect"></select>
           <select id="speedSelect" title="Скорость">
             <option value="0.5">0.5x</option>
@@ -126,13 +126,13 @@
           </select>
           <button id="nextEpBtn">След. серия</button>
           <button id="markCompletedBtn" class="hidden">Отметить просмотренным</button>
-          <button id="fsBtn">⛶</button>
+          <button id="fsBtn" aria-label="Полный экран">⛶</button>
         </div>
       </div>
       <div class="ep-nav">
-        <button id="prevEp">◀ Пред.</button>
+        <button id="prevEp" aria-label="Предыдущая серия">◀ Пред.</button>
         <span id="epLabel"></span>
-        <button id="nextEp">След. ▶</button>
+        <button id="nextEp" aria-label="Следующая серия">След. ▶</button>
       </div>
     </section>
 

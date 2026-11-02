@@ -145,6 +145,13 @@ const App = {
 
     // hotkeys
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('settingsModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          modal.classList.add('hidden');
+          return;
+        }
+      }
       if (this.state.view !== 'player') return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       if (e.code === 'Space') { e.preventDefault(); Player.togglePlay(); }
@@ -760,6 +767,8 @@ const App = {
   openSettings() {
     const modal = document.getElementById('settingsModal');
     modal.classList.remove('hidden');
+    const firstInput = modal.querySelector('input, button, select');
+    if (firstInput) firstInput.focus();
     API.indexInfo().then(r => {
       const d = r.data || r;
       document.getElementById('indexInfo').textContent = `Индекс AniLibria: ${d.indexCount || 0} / ${d.apiTotal || 0} (готов: ${d.ready ? 'да' : 'нет'})`;
