@@ -40,6 +40,8 @@ const Player = {
 
     const ups = document.getElementById('upscaleSelect');
     if (ups) ups.addEventListener('change', (e) => this.setUpscale(e.target.value));
+    const speedSel = document.getElementById('speedSelect');
+    if (speedSel) speedSel.addEventListener('change', (e) => this.setSpeed(parseFloat(e.target.value)));
     this.initUpscale();
   },
 
@@ -177,6 +179,12 @@ const Player = {
     if (prog && prog.time && prog.time < (this.video.duration || 9999)) {
       this.video.currentTime = prog.time;
     }
+    const savedSpeed = Storage.settings().speed || 1;
+    this.video.playbackRate = savedSpeed;
+    const speedSel = document.getElementById('speedSelect');
+    if (speedSel) speedSel.value = String(savedSpeed);
+    const savedVol = Storage.settings().volume;
+    if (typeof savedVol === 'number') this.video.volume = savedVol;
     this.resetHideTimer();
   },
 
@@ -318,7 +326,11 @@ const Player = {
     this.video.currentTime = Math.max(0, Math.min(this.video.duration || 0, this.video.currentTime + delta));
   },
 
-  setVolume(v) { this.video.volume = v; },
+  setVolume(v) { this.video.volume = v; Storage.setSettings(Object.assign(Storage.settings(), { volume: v })); },
+  setSpeed(v) {
+    this.video.playbackRate = v;
+    Storage.setSettings(Object.assign(Storage.settings(), { speed: v }));
+  },
 
   fullscreen() {
     const w = document.getElementById('playerWrap');
