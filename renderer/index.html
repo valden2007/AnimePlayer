@@ -115,7 +115,7 @@
     <section id="viewPlayer" class="view hidden">
       <button id="backFromPlayer" class="backbtn">← К тайтлу</button>
       <div class="player-wrap" id="playerWrap">
-        <video id="video" playsinline></video>
+        <video id="video" playsinline crossorigin="anonymous"></video>
         <iframe id="iframePlayer" class="hidden" allowfullscreen></iframe>
         <canvas id="upscaleCanvas" class="hidden"></canvas>
         <div class="play-icon hidden" id="playIcon">▶</div>
@@ -128,6 +128,9 @@
           <button id="muteBtn" aria-label="Звук">🔊</button>
           <select id="voiceSelect"></select>
           <select id="qualitySelect"></select>
+          <select id="subtitleSelect" title="Субтитры">
+            <option value="">Без субтитров</option>
+          </select>
           <select id="speedSelect" title="Скорость">
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>

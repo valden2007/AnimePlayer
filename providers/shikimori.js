@@ -9,6 +9,11 @@ function img(u) {
   return BASE + u;
 }
 
+/**
+ * Normalize Shikimori title to common format.
+ * @param {Object} r - Raw title from API.
+ * @returns {Object} Normalized title.
+ */
 function normalizeTitle(r) {
   const year = r.aired_on ? parseInt(String(r.aired_on).slice(0, 4), 10) : null;
   return {

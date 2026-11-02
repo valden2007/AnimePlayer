@@ -175,6 +175,18 @@ const Player = {
       vsel.onchange = () => this.changeVoice(vsel.value);
     }
 
+    const subSel = document.getElementById('subtitleSelect');
+    if (subSel) {
+      subSel.innerHTML = '<option value="">Без субтитров</option>';
+      const subs = episode.subtitles || [];
+      for (const s of subs) {
+        const o = document.createElement('option');
+        o.value = s.url; o.textContent = s.lang || 'Субтитры';
+        subSel.appendChild(o);
+      }
+      subSel.onchange = () => this.setSubtitle(subSel.value);
+    }
+
     const sel = document.getElementById('qualitySelect');
     sel.innerHTML = '';
     const autoOpt = document.createElement('option');
@@ -371,6 +383,21 @@ const Player = {
   },
 
   setVolume(v) { this.video.volume = v; Storage.setSettings(Object.assign(Storage.settings(), { volume: v })); },
+
+  setSubtitle(url) {
+    // remove existing tracks
+    const video = this.video;
+    for (const t of video.querySelectorAll('track')) t.remove();
+    if (url) {
+      const track = document.createElement('track');
+      track.kind = 'subtitles';
+      track.label = 'Субтитры';
+      track.srclang = 'ru';
+      track.src = url;
+      track.default = true;
+      video.appendChild(track);
+    }
+  },
   setSpeed(v) {
     this.video.playbackRate = v;
     Storage.setSettings(Object.assign(Storage.settings(), { speed: v }));

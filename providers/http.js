@@ -5,6 +5,11 @@ const memoryCache = new Map();
 let diskCache = {};
 let diskCachePath = null;
 
+/**
+ * Sleep for given milliseconds.
+ * @param {number} ms - Milliseconds to sleep.
+ * @returns {Promise<void>}
+ */
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 const lastRequest = {};
@@ -44,6 +49,18 @@ async function fetchWithTimeout(url, opts, timeoutMs) {
   }
 }
 
+/**
+ * Cached fetch with retry, timeout and disk cache.
+ * @param {string} url - URL to fetch.
+ * @param {Object} [opts] - Options.
+ * @param {number} [opts.ttl] - Cache TTL in ms.
+ * @param {number} [opts.minInterval] - Min interval between requests to same host.
+ * @param {number} [opts.timeoutMs] - Request timeout in ms.
+ * @param {number} [opts.retries] - Number of retries.
+ * @param {boolean} [opts.disk] - Use disk cache.
+ * @param {Object} [opts.headers] - Request headers.
+ * @returns {Promise<any>} Parsed JSON response.
+ */
 async function cachedFetch(url, opts = {}) {
   const ttl = opts.ttl || 0;
   const minInterval = opts.minInterval || 0;

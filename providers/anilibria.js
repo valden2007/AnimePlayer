@@ -10,6 +10,11 @@ function img(u) {
   return BASE + u;
 }
 
+/**
+ * Normalize AniLibria title to common format.
+ * @param {Object} r - Raw title from API.
+ * @returns {Object} Normalized title.
+ */
 function normalizeTitle(r) {
   return {
     id: r.id,
@@ -31,6 +36,12 @@ function normalizeTitle(r) {
   };
 }
 
+/**
+ * Normalize AniLibria episode to common format.
+ * @param {Object} e - Raw episode from API.
+ * @param {string|number} releaseId - Release id.
+ * @returns {Object} Normalized episode.
+ */
 function normalizeEpisode(e, releaseId) {
   const streams = {};
   if (e.hls_480) streams['480'] = e.hls_480;
@@ -45,6 +56,7 @@ function normalizeEpisode(e, releaseId) {
     ending: e.ending || null,
     rutubeId: e.rutube_id || null,
     youtubeId: e.youtube_id || null,
+    subtitles: Array.isArray(e.subtitles) ? e.subtitles : [],
     streams
   };
 }
