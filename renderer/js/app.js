@@ -261,6 +261,9 @@ const App = {
     if (name === 'library') this.renderLibrary();
   },
 
+  /**
+   * Load home page (newest/popular or filtered results).
+   */
   async loadHome() {
     this.showView('home');
     const genre = document.getElementById('genreFilter').value;
@@ -546,6 +549,11 @@ const App = {
     });
   },
 
+  /**
+   * Open title page.
+   * @param {string|null} provider - Provider id.
+   * @param {string|number} id - Title id.
+   */
   async openTitle(provider, id) {
     this.state.previousView = this.state.view;
     this.state.previousScroll = window.scrollY;
@@ -677,6 +685,13 @@ const App = {
     setTimeout(() => window.scrollTo(0, this.state.previousScroll || 0), 50);
   },
 
+  /**
+   * Open player for an episode.
+   * @param {string} provider - Provider id.
+   * @param {Object} title - Title object.
+   * @param {Object} episode - Episode object.
+   * @param {Array} episodes - All episodes.
+   */
   async openPlayer(provider, title, episode, episodes) {
     this.state.provider = provider || this.state.provider;
     const item = this.getLibraryItem(title);
@@ -827,6 +842,9 @@ const App = {
     document.documentElement.setAttribute('data-theme', theme);
   },
 
+  /**
+   * Open settings modal.
+   */
   openSettings() {
     const modal = document.getElementById('settingsModal');
     const themeSel = document.getElementById('themeSelect');
