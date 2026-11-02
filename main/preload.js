@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('api', {
   search: (provider, query, page) => ipcRenderer.invoke('search', { provider, query, page }),
   getTitle: (provider, id) => ipcRenderer.invoke('getTitle', { provider, id }),
   getEpisodes: (provider, id) => ipcRenderer.invoke('getEpisodes', { provider, id }),
+  getSimilar: (provider, id) => ipcRenderer.invoke('getSimilar', { provider, id }),
   getStream: (provider, episodeId, quality) => ipcRenderer.invoke('getStream', { provider, episodeId, quality }),
   getVoices: (provider, titleId, episodeId) => ipcRenderer.invoke('getVoices', { provider, titleId, episodeId }),
   diagSources: (title) => ipcRenderer.invoke('diagSources', { title }),

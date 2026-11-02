@@ -121,6 +121,10 @@ class AniLibriaProvider extends BaseProvider {
     for (let y = cur; y >= 1960; y--) out.push(y);
     return out;
   }
+
+  async getSimilar(id) {
+    return [];
+  }
 }
 
 module.exports = { AniLibriaProvider };

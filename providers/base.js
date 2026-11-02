@@ -14,6 +14,7 @@ class BaseProvider {
   async getCatalog(opts) { throw new Error('not implemented'); }
   async getGenres() { throw new Error('not implemented'); }
   async getYears() { throw new Error('not implemented'); }
+  async getSimilar(id) { return []; }
 }
 
 module.exports = { BaseProvider };

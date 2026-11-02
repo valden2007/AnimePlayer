@@ -45,6 +45,7 @@ function registerIpc() {
   ipcMain.handle('search', async (_e, { provider, query, page }) => providers.search(provider, query, page));
   ipcMain.handle('getTitle', async (_e, { provider, id }) => providers.getTitle(provider, id));
   ipcMain.handle('getEpisodes', async (_e, { provider, id }) => providers.getEpisodes(provider, id));
+  ipcMain.handle('getSimilar', async (_e, { provider, id }) => providers.getSimilar(provider, id));
   ipcMain.handle('getStream', async (_e, { provider, episodeId, quality }) => providers.getStream(provider, episodeId, quality));
   ipcMain.handle('getCatalog', async (_e, { provider, opts }) => providers.getCatalog(provider, opts));
   ipcMain.handle('getGenres', async (_e, { provider }) => providers.getGenres(provider));

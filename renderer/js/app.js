@@ -542,6 +542,23 @@ const App = {
         this.state.streamTitleId = id;
       }
       this.state.currentEpisodes = episodes;
+      // similar
+      const similarGrid = document.getElementById('similarGrid');
+      similarGrid.innerHTML = '';
+      const sid = (prov === 'shikimori') ? title.id : (title.shikimoriId || null);
+      if (sid) {
+        try {
+          const sr = await API.similar('shikimori', sid);
+          const items = sr.data || [];
+          if (items.length) this.renderGrid(similarGrid, items);
+          else similarGrid.innerHTML = '<div class="empty">Нет похожих</div>';
+        } catch {
+          similarGrid.innerHTML = '';
+        }
+      } else {
+        similarGrid.innerHTML = '<div class="empty">Нет данных</div>';
+      }
+
       const list = document.getElementById('episodesList');
       list.innerHTML = '';
       if (!episodes.length) {

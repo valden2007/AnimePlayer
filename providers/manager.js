@@ -10,6 +10,17 @@ class ProviderManager {
   }
 
   getIndexInfo() { return { ready: this.indexer.ready, indexCount: this.indexer.entries.length, apiTotal: this.indexer.apiTotal }; }
+
+  async getSimilar(providerId, id) {
+    const errs = [];
+    for (const p of this._order(providerId)) {
+      try {
+        const data = await p.getSimilar(id);
+        if (data && data.length) return { provider: p.id, data };
+      } catch (e) { errs.push(`${p.name}: ${e.message}`); }
+    }
+    return { provider: providerId, data: [] };
+  }
   list() { return this.providers.map(p => ({ id: p.id, name: p.name })); }
   _order(preferredId) {
     if (!preferredId) return [...this.providers];

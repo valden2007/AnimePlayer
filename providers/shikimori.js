@@ -56,6 +56,12 @@ class ShikimoriProvider extends BaseProvider {
     return [];
   }
 
+  async getSimilar(id) {
+    const data = await this._fetch(`${BASE}/api/animes/${encodeURIComponent(id)}/similar`);
+    const arr = Array.isArray(data) ? data : [];
+    return arr.map(normalizeTitle);
+  }
+
   async getStream(episodeId, quality) {
     throw new Error('Источник не предоставляет видеопотоки');
   }
