@@ -264,6 +264,10 @@ const App = {
   /**
    * Load home page (newest/popular or filtered results).
    */
+  /**
+   * Load home page.
+   * @returns {Promise<void>}
+   */
   async loadHome() {
     this.showView('home');
     const genre = document.getElementById('genreFilter').value;
@@ -692,6 +696,14 @@ const App = {
    * @param {Object} episode - Episode object.
    * @param {Array} episodes - All episodes.
    */
+  /**
+   * Open player for an episode.
+   * @param {string} provider - Provider id.
+   * @param {Object} title - Title object.
+   * @param {Object} episode - Episode object.
+   * @param {Array} episodes - All episodes.
+   * @returns {Promise<void>}
+   */
   async openPlayer(provider, title, episode, episodes) {
     this.state.provider = provider || this.state.provider;
     const item = this.getLibraryItem(title);
@@ -817,6 +829,9 @@ const App = {
     // auto set watching on first view already handled elsewhere
   },
 
+  /**
+   * Toggle favorite status for current title.
+   */
   toggleFav() {
     const title = this.state.currentTitle;
     if (!title) return;
@@ -842,6 +857,9 @@ const App = {
     document.documentElement.setAttribute('data-theme', theme);
   },
 
+  /**
+   * Open settings modal.
+   */
   /**
    * Open settings modal.
    */

@@ -152,6 +152,14 @@ const Player = {
     this.upscaleRaf = requestAnimationFrame(() => this.upscaleLoop());
   },
 
+  /**
+   * Load episode into player.
+   * @param {string} provider - Provider id.
+   * @param {Object} title - Title object.
+   * @param {Object} episode - Episode object.
+   * @param {Array} episodes - All episodes.
+   * @param {Array} [voices] - Available voices.
+   */
   async load(provider, title, episode, episodes, voices) {
     const idx = episodes.findIndex(e => e.id === episode.id);
     const voiceList = voices && voices.length ? voices : [{ id: 'anilibria', name: 'AniLibria' }];
@@ -372,6 +380,9 @@ const Player = {
     if (v.duration) seek.value = (v.currentTime / v.duration * 100).toFixed(2);
   },
 
+  /**
+   * Toggle play/pause.
+   */
   togglePlay() {
     if (this.video.paused) this.video.play(); else this.video.pause();
     document.getElementById('playPause').textContent = this.video.paused ? '▶' : '⏸';
@@ -403,6 +414,9 @@ const Player = {
     Storage.setSettings(Object.assign(Storage.settings(), { speed: v }));
   },
 
+  /**
+   * Toggle fullscreen mode.
+   */
   fullscreen() {
     const w = document.getElementById('playerWrap');
     if (document.fullscreenElement) document.exitFullscreen();
