@@ -1,4 +1,9 @@
-const cache = new Map();
+const fs = require('fs');
+const path = require('path');
+
+const memoryCache = new Map();
+let diskCache = {};
+let diskCachePath = null;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -9,6 +14,23 @@ async function rateLimit(host, minInterval) {
   const wait = minInterval - (now - last);
   if (wait > 0) await sleep(wait);
   lastRequest[host] = Date.now();
+}
+
+function initDiskCache(userDataPath) {
+  if (!userDataPath) return;
+  diskCachePath = path.join(userDataPath, 'http_cache.json');
+  try {
+    if (fs.existsSync(diskCachePath)) {
+      diskCache = JSON.parse(fs.readFileSync(diskCachePath, 'utf-8'));
+    }
+  } catch { diskCache = {}; }
+}
+
+function saveDiskCache() {
+  if (!diskCachePath) return;
+  try {
+    fs.writeFileSync(diskCachePath, JSON.stringify(diskCache), 'utf-8');
+  } catch {}
 }
 
 async function fetchWithTimeout(url, opts, timeoutMs) {
@@ -27,11 +49,21 @@ async function cachedFetch(url, opts = {}) {
   const minInterval = opts.minInterval || 0;
   const timeoutMs = opts.timeoutMs || 15000;
   const retries = opts.retries || 2;
+  const useDisk = opts.disk || false;
   const host = new URL(url).host;
 
+  // memory cache
   if (ttl > 0) {
-    const c = cache.get(url);
+    const c = memoryCache.get(url);
     if (c && Date.now() - c.ts < ttl) return c.data;
+  }
+  // disk cache
+  if (useDisk && ttl > 0 && diskCache[url]) {
+    const c = diskCache[url];
+    if (Date.now() - c.ts < ttl) {
+      memoryCache.set(url, c);
+      return c.data;
+    }
   }
 
   let lastError = null;
@@ -41,14 +73,21 @@ async function cachedFetch(url, opts = {}) {
       const res = await fetchWithTimeout(url, { headers: opts.headers }, timeoutMs);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (ttl > 0) cache.set(url, { ts: Date.now(), data });
+      const entry = { ts: Date.now(), data };
+      if (ttl > 0) {
+        memoryCache.set(url, entry);
+        if (useDisk) { diskCache[url] = entry; saveDiskCache(); }
+      }
       return data;
     } catch (e) {
       lastError = e;
       if (attempt < retries) await sleep(500 * (attempt + 1));
     }
   }
+  // offline fallback: return stale cache
+  if (memoryCache.get(url)) return memoryCache.get(url).data;
+  if (diskCache[url]) return diskCache[url].data;
   throw lastError || new Error('Network error');
 }
 
-module.exports = { cachedFetch, sleep };
+module.exports = { cachedFetch, sleep, initDiskCache };

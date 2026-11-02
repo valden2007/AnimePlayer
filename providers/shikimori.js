@@ -35,7 +35,8 @@ class ShikimoriProvider extends BaseProvider {
     return cachedFetch(url, {
       headers: { 'User-Agent': 'AnimePlayer/1.0' },
       ttl: 5 * 60 * 1000,
-      minInterval: 200
+      minInterval: 200,
+      disk: true
     });
   }
 

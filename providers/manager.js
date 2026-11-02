@@ -1,6 +1,7 @@
 const { AniLibriaProvider } = require('./anilibria');
 const { ShikimoriProvider } = require('./shikimori');
 const { AniLibriaIndexer } = require('./indexer');
+const { initDiskCache } = require('./http');
 
 /**
  * Manages data providers with automatic fallback.
@@ -8,6 +9,7 @@ const { AniLibriaIndexer } = require('./indexer');
  */
 class ProviderManager {
   constructor(userDataPath) {
+    initDiskCache(userDataPath);
     this.providers = [new AniLibriaProvider(), new ShikimoriProvider()];
     this.indexer = new AniLibriaIndexer(userDataPath);
     setTimeout(() => this.indexer.ensure().catch(() => {}), 5000);
