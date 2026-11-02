@@ -6,7 +6,7 @@ class ProviderManager {
   constructor(userDataPath) {
     this.providers = [new AniLibriaProvider(), new ShikimoriProvider()];
     this.indexer = new AniLibriaIndexer(userDataPath);
-    this.indexer.ensure().catch(() => {});
+    setTimeout(() => this.indexer.ensure().catch(() => {}), 5000);
   }
 
   getIndexInfo() { return { ready: this.indexer.ready, indexCount: this.indexer.entries.length, apiTotal: this.indexer.apiTotal }; }
