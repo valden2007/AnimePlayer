@@ -14,7 +14,11 @@ const App = {
     resultsPage: 1,
     resultsHasMore: false,
     resultsTotal: 0,
-    resultsItems: []
+    resultsItems: [],
+    newestPage: 1,
+    newestHasMore: false,
+    popularPage: 1,
+    popularHasMore: false
   },
 
   async init() {
@@ -123,6 +127,8 @@ const App = {
     document.getElementById('nextEp').addEventListener('click', () => Player.nextEpisode());
 
     document.getElementById('loadMoreBtn').addEventListener('click', () => this.loadMoreResults());
+    document.getElementById('loadMoreNewest').addEventListener('click', () => this.loadMoreNewest());
+    document.getElementById('loadMorePopular').addEventListener('click', () => this.loadMorePopular());
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
@@ -222,26 +228,33 @@ const App = {
 
       const newestGrid = document.getElementById('newestGrid');
       newestGrid.innerHTML = this.skeletons(12);
+      this.state.newestPage = 1;
       try {
-        const opts = { limit: 12, sorting: 'FRESH_AT_DESC', status: 'all', yearTo: String(new Date().getFullYear()) };
+        const opts = { limit: 12, page: 1, sorting: 'FRESH_AT_DESC', status: 'all', yearTo: String(new Date().getFullYear()) };
         const r = await API.catalog(this.state.provider, opts);
         let items = r.data || [];
-        // exclude future years and anons client-side
         const curY = new Date().getFullYear();
         items = items.filter(t => !t.year || t.year <= curY);
         this.renderGrid(newestGrid, items);
+        this.state.newestHasMore = (r.data || []).length >= 12;
+        const btnN = document.getElementById('loadMoreNewest');
+        btnN.classList.toggle('hidden', !this.state.newestHasMore);
       } catch (e) {
         newestGrid.innerHTML = `<div class="empty">${e.message}</div>`;
       }
       const popularGrid = document.getElementById('popularGrid');
       popularGrid.innerHTML = this.skeletons(12);
+      this.state.popularPage = 1;
       try {
-        const opts = { limit: 12, sorting: 'RATING_DESC', status: 'released', yearTo: String(new Date().getFullYear()) };
+        const opts = { limit: 12, page: 1, sorting: 'RATING_DESC', status: 'released', yearTo: String(new Date().getFullYear()) };
         const r = await API.catalog(this.state.provider, opts);
         let items = r.data || [];
         const curY = new Date().getFullYear();
         items = items.filter(t => !t.year || t.year <= curY);
         this.renderGrid(popularGrid, items);
+        this.state.popularHasMore = (r.data || []).length >= 12;
+        const btnP = document.getElementById('loadMorePopular');
+        btnP.classList.toggle('hidden', !this.state.popularHasMore);
       } catch (e) {
         popularGrid.innerHTML = `<div class="empty">${e.message}</div>`;
       }
@@ -315,6 +328,48 @@ const App = {
       } else {
         btn.classList.add('hidden');
       }
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Показать ещё';
+      showToast(e.message);
+    }
+  },
+
+  async loadMoreNewest() {
+    this.state.newestPage++;
+    const btn = document.getElementById('loadMoreNewest');
+    btn.disabled = true; btn.textContent = 'Загрузка...';
+    try {
+      const opts = { limit: 12, page: this.state.newestPage, sorting: 'FRESH_AT_DESC', status: 'all', yearTo: String(new Date().getFullYear()) };
+      const r = await API.catalog(this.state.provider, opts);
+      let items = r.data || [];
+      const curY = new Date().getFullYear();
+      items = items.filter(t => !t.year || t.year <= curY);
+      const grid = document.getElementById('newestGrid');
+      this.renderGridAppend(grid, items);
+      this.state.newestHasMore = (r.data || []).length >= 12;
+      if (this.state.newestHasMore) { btn.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Показать ещё'; }
+      else btn.classList.add('hidden');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Показать ещё';
+      showToast(e.message);
+    }
+  },
+
+  async loadMorePopular() {
+    this.state.popularPage++;
+    const btn = document.getElementById('loadMorePopular');
+    btn.disabled = true; btn.textContent = 'Загрузка...';
+    try {
+      const opts = { limit: 12, page: this.state.popularPage, sorting: 'RATING_DESC', status: 'released', yearTo: String(new Date().getFullYear()) };
+      const r = await API.catalog(this.state.provider, opts);
+      let items = r.data || [];
+      const curY = new Date().getFullYear();
+      items = items.filter(t => !t.year || t.year <= curY);
+      const grid = document.getElementById('popularGrid');
+      this.renderGridAppend(grid, items);
+      this.state.popularHasMore = (r.data || []).length >= 12;
+      if (this.state.popularHasMore) { btn.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Показать ещё'; }
+      else btn.classList.add('hidden');
     } catch (e) {
       btn.disabled = false; btn.textContent = 'Показать ещё';
       showToast(e.message);
