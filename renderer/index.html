@@ -24,7 +24,11 @@
   <main id="app">
     <section id="viewHome" class="view">
       <div class="filters">
-        <select id="genreFilter"><option value="">Все жанры</option></select>
+        <select id="genreFilter" multiple size="4"><option value="">Все жанры</option></select>
+        <select id="genreMode">
+          <option value="or">Жанры: ИЛИ</option>
+          <option value="and">Жанры: И</option>
+        </select>
         <select id="yearFromFilter"><option value="">Год от</option></select>
         <select id="yearToFilter"><option value="">Год до</option></select>
         <select id="statusFilter">

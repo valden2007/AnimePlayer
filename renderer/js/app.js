@@ -232,7 +232,9 @@ const App = {
   },
 
   filtersActive() {
-    return !!(document.getElementById('genreFilter').value ||
+    const genreSel = document.getElementById('genreFilter');
+    const genres = Array.from(genreSel.selectedOptions).map(o => o.value).filter(Boolean);
+    return !!(genres.length ||
       document.getElementById('yearFromFilter').value ||
       document.getElementById('yearToFilter').value ||
       document.getElementById('statusFilter').value !== 'all' ||
@@ -252,7 +254,8 @@ const App = {
 
   async loadHome() {
     this.showView('home');
-    const genre = document.getElementById('genreFilter').value;
+    const genreSel = document.getElementById('genreFilter');
+    const genres = Array.from(genreSel.selectedOptions).map(o => o.value).filter(Boolean);
     const yearFrom = document.getElementById('yearFromFilter').value;
     const yearTo = document.getElementById('yearToFilter').value;
     const sorting = document.getElementById('sortFilter').value;
@@ -313,7 +316,7 @@ const App = {
       document.getElementById('loadMoreBtn').classList.add('hidden');
 
       const opts = { limit: 20, page: 1, sorting };
-      if (genre) opts.genres = [genre];
+      if (genres.length) opts.genres = genres;
       if (yearFrom) opts.yearFrom = yearFrom;
       if (yearTo) opts.yearTo = yearTo;
       const st = document.getElementById('statusFilter').value;
@@ -327,7 +330,11 @@ const App = {
 
       try {
         const r = await API.catalog(this.state.provider, opts);
-        const items = r.data || [];
+        let items = r.data || [];
+        const mode = document.getElementById('genreMode').value;
+        if (mode === 'and' && genres.length > 1) {
+          items = items.filter(t => genres.every(g => (t.genres || []).includes(g)));
+        }
         this.state.resultsItems = items;
         this.state.resultsHasMore = items.length >= 20;
         grid.innerHTML = '';
@@ -346,12 +353,13 @@ const App = {
 
   async loadMoreResults() {
     this.state.resultsPage++;
-    const genre = document.getElementById('genreFilter').value;
+    const genreSel = document.getElementById('genreFilter');
+    const genres = Array.from(genreSel.selectedOptions).map(o => o.value).filter(Boolean);
     const yearFrom = document.getElementById('yearFromFilter').value;
     const yearTo = document.getElementById('yearToFilter').value;
     const sorting = document.getElementById('sortFilter').value;
     const opts = { limit: 20, page: this.state.resultsPage, sorting };
-    if (genre) opts.genres = [genre];
+    if (genres.length) opts.genres = genres;
     if (yearFrom) opts.yearFrom = yearFrom;
     if (yearTo) opts.yearTo = yearTo;
     const st = document.getElementById('statusFilter').value;
@@ -366,7 +374,11 @@ const App = {
     btn.disabled = true; btn.textContent = 'Загрузка...';
     try {
       const r = await API.catalog(this.state.provider, opts);
-      const items = r.data || [];
+      const mode = document.getElementById('genreMode').value;
+      let items = r.data || [];
+      if (mode === 'and' && genres.length > 1) {
+        items = items.filter(t => genres.every(g => (t.genres || []).includes(g)));
+      }
       const grid = document.getElementById('resultsGrid');
       this.renderGridAppend(grid, items);
       this.state.resultsItems = this.state.resultsItems.concat(items);
