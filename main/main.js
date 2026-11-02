@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
 const { ProviderManager } = require('../providers/manager');
 
 function libraryFile() { return path.join(app.getPath('userData'), 'library.json'); }
@@ -104,10 +105,29 @@ if (!gotLock) {
 app.whenReady().then(async () => {
   providers = new ProviderManager(app.getPath('userData'));
   registerIpc();
-  // clear renderer cache
-  try { await mainWindow?.webContents?.session?.clearCache(); } catch {}
   createWindow();
   try { await mainWindow.webContents.session.clearCache(); } catch {}
+
+  // auto-updater (only in packaged app)
+  autoUpdater.autoDownload = true;
+  autoUpdater.on('update-available', () => {
+    if (mainWindow) mainWindow.webContents.send('update-available');
+  });
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Обновление',
+      message: 'Новая версия загружена. Перезапустить сейчас?',
+      buttons: ['Перезапустить', 'Позже']
+    }).then(({ response }) => {
+      if (response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+  autoUpdater.on('error', (err) => { console.error('AutoUpdater error:', err); });
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify().catch(() => {});
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
