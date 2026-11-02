@@ -47,8 +47,9 @@ const App = {
       if (this.state.view === 'home') this.loadHome();
     });
 
-    this.state.library = (await API.library()) || { items: {} };
+    this.state.library = (await API.library()) || { items: {}, collections: {} };
     if (!this.state.library.items) this.state.library.items = {};
+    if (!this.state.library.collections) this.state.library.collections = {};
     this.migrateLibrary();
     await this.loadFilters();
     this.bindEvents();
@@ -530,6 +531,11 @@ const App = {
       document.getElementById('titleMeta').textContent = [title.year, title.type, title.status, title.rating ? `★ ${title.rating}` : ''].filter(Boolean).join(' • ');
       document.getElementById('titleGenres').innerHTML = (title.genres || []).map(g => `<span>${escapeHtml(g)}</span>`).join('');
       this.updateFavToggle();
+      const addColBtn = document.getElementById('addCollectionBtn');
+      if (addColBtn) addColBtn.onclick = () => {
+        const name = prompt('Название коллекции');
+        if (name) { this.createCollection(name); this.addToCollection(name, title); showToast('Добавлено в коллекцию'); }
+      };
       const item = this.getLibraryItem(title);
       const statusSelect = document.getElementById('statusSelect');
       if (statusSelect) statusSelect.value = item && item.status ? item.status : '';
@@ -624,6 +630,7 @@ const App = {
 
   migrateLibrary() {
     const lib = this.state.library;
+    if (!lib.collections) lib.collections = {};
     if (Object.keys(lib.items).length) return;
     const favs = Storage.favs();
     for (const f of favs) {
@@ -668,6 +675,59 @@ const App = {
     const statusSelect = document.getElementById('statusSelect');
     if (statusSelect) statusSelect.value = 'completed';
     showToast('Отмечено как просмотренное');
+  },
+
+  createCollection(name) {
+    if (!name) return;
+    if (!this.state.library.collections[name]) {
+      this.state.library.collections[name] = { name, items: [], createdAt: Date.now() };
+      API.saveLibrary(this.state.library).catch(()=>{});
+    }
+  },
+
+  addToCollection(name, title) {
+    const col = this.state.library.collections[name];
+    if (!col) return;
+    const key = this.libraryKey(title);
+    if (!col.items.includes(key)) {
+      col.items.push(key);
+      API.saveLibrary(this.state.library).catch(()=>{});
+    }
+  },
+
+  removeFromCollection(name, title) {
+    const col = this.state.library.collections[name];
+    if (!col) return;
+    const key = this.libraryKey(title);
+    col.items = col.items.filter(k => k !== key);
+    API.saveLibrary(this.state.library).catch(()=>{});
+  },
+
+  renderCollections() {
+    const list = document.getElementById('collectionsList');
+    if (!list) return;
+    list.innerHTML = '';
+    const cols = Object.values(this.state.library.collections || {});
+    if (!cols.length) { list.innerHTML = '<div class="empty">Нет коллекций</div>'; return; }
+    for (const col of cols) {
+      const div = document.createElement('div');
+      div.className = 'collection';
+      div.innerHTML = `<h3>${escapeHtml(col.name)} (${col.items.length})</h3>`;
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      for (const key of col.items) {
+        const item = this.state.library.items[key];
+        if (!item) continue;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.provider = item.provider;
+        card.dataset.id = item.id;
+        card.innerHTML = `<img src="${item.poster || ''}" alt=""><div class="info"><div class="title">${escapeHtml(item.name)}</div></div>`;
+        grid.appendChild(card);
+      }
+      div.appendChild(grid);
+      list.appendChild(div);
+    }
   },
 
   setStatus(status) {
@@ -786,9 +846,25 @@ const App = {
 
   renderLibrary() {
     this.renderStats();
-    const grid = document.getElementById('libGrid');
-    grid.innerHTML = '';
     const tab = document.querySelector('.tab.active')?.dataset.tab || 'all';
+    const grid = document.getElementById('libGrid');
+    const collectionsView = document.getElementById('collectionsView');
+    if (tab === 'collections') {
+      grid.classList.add('hidden');
+      collectionsView.classList.remove('hidden');
+      this.renderCollections();
+      // wire create button
+      const btn = document.getElementById('createCollectionBtn');
+      if (btn) btn.onclick = () => {
+        const name = document.getElementById('newCollectionName').value.trim();
+        if (name) { this.createCollection(name); document.getElementById('newCollectionName').value = ''; this.renderCollections(); }
+      };
+      return;
+    } else {
+      grid.classList.remove('hidden');
+      collectionsView.classList.add('hidden');
+    }
+    grid.innerHTML = '';
     const q = (document.getElementById('libSearch')?.value || '').toLowerCase();
     const sort = document.getElementById('libSort')?.value || 'added';
     let items = Object.entries(this.state.library.items || {}).map(([key, v]) => ({ key, ...v }));

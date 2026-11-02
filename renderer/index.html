@@ -86,6 +86,7 @@
               <option value="on_hold">Отложено</option>
             </select>
             <button id="favStar">☆</button>
+            <button id="addCollectionBtn">+ Коллекция</button>
           </div>
         </div>
       </div>
@@ -146,6 +147,7 @@
         <button class="tab" data-tab="completed">Просмотрено</button>
         <button class="tab" data-tab="on_hold">Отложено</button>
         <button class="tab" data-tab="favorite">Избранное</button>
+        <button class="tab" data-tab="collections">Коллекции</button>
       </div>
       <div class="filters">
         <input id="libSearch" type="text" placeholder="Поиск в библиотеке">
@@ -155,6 +157,13 @@
         </select>
       </div>
       <div id="libGrid" class="grid"></div>
+      <div id="collectionsView" class="hidden">
+        <div class="row">
+          <input id="newCollectionName" type="text" placeholder="Новая коллекция">
+          <button id="createCollectionBtn">Создать</button>
+        </div>
+        <div id="collectionsList"></div>
+      </div>
       <h2>Продолжить просмотр</h2>
       <div id="contGrid" class="grid"></div>
       <h2>История поиска</h2>
