@@ -103,6 +103,8 @@ const App = {
 
     document.getElementById('settingsBtn').addEventListener('click', () => this.openSettings());
     document.getElementById('libBtn').addEventListener('click', () => this.showView('library'));
+    const continueBtn = document.getElementById('continueBtn');
+    if (continueBtn) continueBtn.addEventListener('click', () => this.continueWatching());
     document.getElementById('contBtn').addEventListener('click', () => this.showView('favorites'));
     const favToggle = document.getElementById('favToggle');
     if (favToggle) favToggle.addEventListener('click', () => this.toggleFav());
@@ -538,6 +540,7 @@ const App = {
     this.state.provider = provider || this.state.provider;
     document.getElementById('providerSelect').value = this.state.provider;
     this.showView('title');
+    window.scrollTo(0, 0);
     document.getElementById('titleName').textContent = 'Загрузка...';
     document.getElementById('titleDesc').textContent = '';
     document.getElementById('titleGenres').innerHTML = '';
@@ -617,12 +620,14 @@ const App = {
       if (!episodes.length) {
         list.innerHTML = '<div class="empty">Нет доступных серий для этого тайтла</div>';
       } else {
+        const prog = Storage.progress();
         episodes.forEach((e, i) => {
           const row = document.createElement('div');
           row.className = 'ep';
           row.dataset.provider = epProvider;
           row.dataset.id = e.id;
-          row.innerHTML = `<span class="num">${e.number || i+1}</span><span class="name">${escapeHtml(e.name)}</span>`;
+          const watched = prog[e.id]?.watched ? ' ✓' : '';
+          row.innerHTML = `<span class="num">${e.number || i+1}</span><span class="name">${escapeHtml(e.name)}${watched}</span>`;
           row.addEventListener('click', () => this.openPlayer(epProvider, title, e, episodes));
           list.appendChild(row);
         });
@@ -633,6 +638,21 @@ const App = {
       document.getElementById('episodesList').innerHTML = `<div class="empty">${escapeHtml(e && e.stack ? e.stack : (e && e.message ? e.message : String(e)))}</div>`;
       showToast(e && e.message ? e.message : String(e));
     }
+  },
+
+  continueWatching() {
+    const prog = Storage.progress();
+    const items = Object.values(prog).sort((a,b) => b.ts - a.ts);
+    if (!items.length) { showToast('Нет истории просмотра'); return; }
+    const p = items[0];
+    API.title(p.provider, p.titleId).then(t => {
+      const title = t.data;
+      API.episodes(p.provider, p.titleId).then(ep => {
+        const eps = ep.data || [];
+        const e = eps.find(x => x.id === p.episodeId) || eps[0];
+        if (e) this.openPlayer(p.provider, title, e, eps);
+      });
+    }).catch(e => showToast(e.message));
   },
 
   goBack() {

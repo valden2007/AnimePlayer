@@ -346,7 +346,8 @@ const Player = {
     if (!this.current) return;
     const ep = this.current.episode;
     const prog = Storage.progress();
-    prog[ep.id] = { time: this.video.currentTime, duration: this.video.duration, titleId: this.current.title.id, titleName: this.current.title.name, provider: this.current.provider, episodeId: ep.id, ts: Date.now() };
+    const watched = this.video.duration && (this.video.currentTime / this.video.duration) > 0.9;
+    prog[ep.id] = { time: this.video.currentTime, duration: this.video.duration, titleId: this.current.title.id, titleName: this.current.title.name, provider: this.current.provider, episodeId: ep.id, watched, ts: Date.now() };
     Storage.setProgress(prog);
   },
 
