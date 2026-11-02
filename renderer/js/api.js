@@ -1,3 +1,7 @@
+/**
+ * API wrapper for IPC calls to main process.
+ * @namespace API
+ */
 const API = {
   async providers() { return window.api.providersList(); },
   async search(provider, query, page = 1) { return window.api.search(provider, query, page); },

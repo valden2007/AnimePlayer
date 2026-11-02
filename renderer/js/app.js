@@ -1,3 +1,7 @@
+/**
+ * Main application controller.
+ * @namespace App
+ */
 const App = {
   state: {
     provider: null,

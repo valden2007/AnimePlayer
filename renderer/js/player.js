@@ -1,3 +1,7 @@
+/**
+ * Video player controller.
+ * @namespace Player
+ */
 const Player = {
   video: null,
   hls: null,
