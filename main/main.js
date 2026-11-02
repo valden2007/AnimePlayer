@@ -38,6 +38,10 @@ function createWindow() {
   mainWindow.webContents.on('did-fail-load', (_e, code, desc) => {
     console.error('Failed to load renderer:', code, desc);
   });
+  mainWindow.webContents.on('console-message', (_e, level, msg) => {
+    const fs = require('fs');
+    fs.appendFileSync('C:/Users/PC/AppData/Local/Temp/opencode/main_start.log', 'CONSOLE[' + level + '] ' + msg + '\\n', 'utf-8');
+  });
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
@@ -103,6 +107,8 @@ if (!gotLock) {
 }
 
 app.whenReady().then(async () => {
+  const fs = require('fs');
+  fs.writeFileSync('C:/Users/PC/AppData/Local/Temp/opencode/main_start.log', 'STARTED\n', 'utf-8');
   providers = new ProviderManager(app.getPath('userData'));
   registerIpc();
   createWindow();

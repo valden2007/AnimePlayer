@@ -22,6 +22,7 @@ const App = {
   },
 
   async init() {
+    console.log('App.init started');
     Player.init();
     const list = await API.providers();
     const sel = document.getElementById('providerSelect');
@@ -96,7 +97,7 @@ const App = {
     if (backFromLib) backFromLib.addEventListener('click', () => this.showView('home'));
 
     document.getElementById('settingsBtn').addEventListener('click', () => this.openSettings());
-    document.getElementById('favBtn').addEventListener('click', () => this.showView('library'));
+    document.getElementById('libBtn').addEventListener('click', () => this.showView('library'));
     document.getElementById('contBtn').addEventListener('click', () => this.showView('favorites'));
     const favToggle = document.getElementById('favToggle');
     if (favToggle) favToggle.addEventListener('click', () => this.toggleFav());
@@ -216,7 +217,7 @@ const App = {
 
   showView(name) {
     this.state.view = name;
-    for (const v of ['Home','Search','Title','Player','Favorites']) {
+    for (const v of ['Home','Search','Title','Player','Library']) {
       const el = document.getElementById('view' + v);
       if (el) el.classList.toggle('hidden', v.toLowerCase() !== name.toLowerCase());
     }

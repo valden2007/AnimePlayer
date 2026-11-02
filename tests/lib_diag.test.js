@@ -1,0 +1,21 @@
+const { _electron: electron } = require('playwright');
+const path = require('path');
+(async () => {
+  const app = await electron.launch({ args: [path.resolve(__dirname, '..')] });
+  const window = await app.firstWindow({ timeout: 30000 });
+  window.on('console', msg => console.log('CONSOLE[' + msg.type() + ']:', msg.text()));
+  await window.waitForLoadState('domcontentloaded', { timeout: 30000 });
+  await window.waitForTimeout(10000);
+  const lib = await window.evaluate(async () => await API.library());
+  console.log('LIBRARY:', JSON.stringify(lib));
+  const items = lib?.items || lib?.data?.items || {};
+  console.log('ITEMS_COUNT:', Object.keys(items).length);
+  await window.click('#favBtn');
+  await window.waitForTimeout(2000);
+  const tabs = await window.evaluate(() => Array.from(document.querySelectorAll('.tab')).map(t => t.textContent));
+  console.log('TABS:', tabs);
+  const grid = await window.locator('#libGrid').textContent();
+  console.log('GRID:', grid && grid.slice(0, 200));
+  await app.close();
+  console.log('DONE');
+})().catch(e => { console.error('ERR', e.message); process.exit(1); });
