@@ -143,8 +143,7 @@ const App = {
     document.getElementById('fsBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.fullscreen(); });
     const pipBtn = document.getElementById('pipBtn');
     if (pipBtn) pipBtn.addEventListener('click', (e) => { e.stopPropagation(); Player.togglePip(); });
-    const loadSubBtn = document.getElementById('loadSubBtn');
-    if (loadSubBtn) loadSubBtn.addEventListener('click', (e) => { e.stopPropagation(); Player.loadSubtitleFile(); });
+
     document.getElementById('nextEpBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.nextEpisode(); });
     const markBtn = document.getElementById('markCompletedBtn');
     if (markBtn) markBtn.addEventListener('click', (e) => { e.stopPropagation(); this.markCompleted(); });
@@ -256,6 +255,10 @@ const App = {
 
   showView(name) {
     this.state.view = name;
+    if (name !== 'player' && Player.video) {
+      Player.video.pause();
+      if (Player.hls) { /* keep hls alive for resume */ }
+    }
     for (const v of ['Home','Search','Title','Player','Library']) {
       const el = document.getElementById('view' + v);
       if (el) el.classList.toggle('hidden', v.toLowerCase() !== name.toLowerCase());

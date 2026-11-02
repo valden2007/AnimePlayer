@@ -41,6 +41,7 @@ const Player = {
     wrap.addEventListener('mousemove', () => this.resetHideTimer());
     wrap.addEventListener('mouseleave', () => this.resetHideTimer());
     document.addEventListener('fullscreenchange', () => this.resetHideTimer());
+    window.addEventListener('resize', () => { if (this.upscaleMode !== 'off') this.upscaleLoop(); });
 
     const ups = document.getElementById('upscaleSelect');
     if (ups) ups.addEventListener('change', (e) => this.setUpscale(e.target.value));
