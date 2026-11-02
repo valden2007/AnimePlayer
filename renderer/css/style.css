@@ -105,6 +105,10 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 }
 .build-info { position: fixed; bottom: 4px; right: 8px; font-size: 10px; color: var(--muted); z-index: 50; pointer-events: none; }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.stats-block { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: var(--bg2); border-radius: 8px; }
+.stats-block .stat { text-align: center; }
+.stats-block .stat .num { font-size: 20px; font-weight: 700; color: var(--accent); }
+.stats-block .stat .label { font-size: 12px; color: var(--muted); }
 .tab { padding: 6px 12px; border-radius: 6px; background: var(--bg2); border: 1px solid var(--border); color: var(--muted); }
 .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .skip-btn { position: absolute; right: 16px; bottom: 70px; padding: 8px 14px; background: rgba(0,0,0,.7); color: #fff; border: 1px solid var(--accent); border-radius: 6px; cursor: pointer; z-index: 5; }

@@ -755,7 +755,37 @@ const App = {
     };
   },
 
+  renderStats() {
+    const block = document.getElementById('statsBlock');
+    if (!block) return;
+    const items = Object.values(this.state.library.items || {});
+    const byStatus = { watching: 0, planned: 0, completed: 0, on_hold: 0 };
+    for (const it of items) if (byStatus[it.status] !== undefined) byStatus[it.status]++;
+    const favCount = items.filter(x => x.favorite).length;
+    const prog = Storage.progress();
+    const watchedEps = Object.keys(prog).length;
+    let totalSec = 0;
+    for (const p of Object.values(prog)) totalSec += (p.time || 0);
+    const hours = (totalSec / 3600).toFixed(1);
+    // favorite genres
+    const genreCount = {};
+    for (const it of items) {
+      // genres not stored in library item; skip
+    }
+    block.innerHTML = `
+      <div class="stat"><div class="num">${items.length}</div><div class="label">Всего</div></div>
+      <div class="stat"><div class="num">${byStatus.watching}</div><div class="label">Смотрю</div></div>
+      <div class="stat"><div class="num">${byStatus.planned}</div><div class="label">В планах</div></div>
+      <div class="stat"><div class="num">${byStatus.completed}</div><div class="label">Просмотрено</div></div>
+      <div class="stat"><div class="num">${byStatus.on_hold}</div><div class="label">Отложено</div></div>
+      <div class="stat"><div class="num">${favCount}</div><div class="label">Избранное</div></div>
+      <div class="stat"><div class="num">${watchedEps}</div><div class="label">Серий начато</div></div>
+      <div class="stat"><div class="num">${hours}</div><div class="label">Часов просмотрено</div></div>
+    `;
+  },
+
   renderLibrary() {
+    this.renderStats();
     const grid = document.getElementById('libGrid');
     grid.innerHTML = '';
     const tab = document.querySelector('.tab.active')?.dataset.tab || 'all';
