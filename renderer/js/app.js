@@ -230,11 +230,11 @@ const App = {
       newestGrid.innerHTML = this.skeletons(12);
       this.state.newestPage = 1;
       try {
-        const opts = { limit: 12, page: 1, sorting: 'FRESH_AT_DESC', status: 'all', yearTo: String(new Date().getFullYear()) };
+        const curY = new Date().getFullYear();
+        const opts = { limit: 12, page: 1, sorting: 'FRESH_AT_DESC', status: 'all', yearFrom: String(curY - 1), yearTo: String(curY) };
         const r = await API.catalog(this.state.provider, opts);
         let items = r.data || [];
-        const curY = new Date().getFullYear();
-        items = items.filter(t => !t.year || t.year <= curY);
+        items = items.filter(t => !t.year || (t.year >= curY - 1 && t.year <= curY));
         this.renderGrid(newestGrid, items);
         this.state.newestHasMore = (r.data || []).length >= 12;
         const btnN = document.getElementById('loadMoreNewest');
@@ -339,11 +339,12 @@ const App = {
     const btn = document.getElementById('loadMoreNewest');
     btn.disabled = true; btn.textContent = 'Загрузка...';
     try {
-      const opts = { limit: 12, page: this.state.newestPage, sorting: 'FRESH_AT_DESC', status: 'all', yearTo: String(new Date().getFullYear()) };
+      const curY = new Date().getFullYear();
+      const opts = { limit: 12, page: this.state.newestPage, sorting: 'FRESH_AT_DESC', status: 'all', yearFrom: String(curY - 1), yearTo: String(curY) };
       const r = await API.catalog(this.state.provider, opts);
       let items = r.data || [];
       const curY = new Date().getFullYear();
-      items = items.filter(t => !t.year || t.year <= curY);
+      items = items.filter(t => !t.year || (t.year >= curY - 1 && t.year <= curY));
       const grid = document.getElementById('newestGrid');
       this.renderGridAppend(grid, items);
       this.state.newestHasMore = (r.data || []).length >= 12;
