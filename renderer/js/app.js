@@ -130,6 +130,8 @@ const App = {
     const voiceSelect = document.getElementById('voiceSelect');
     if (voiceSelect) voiceSelect.addEventListener('change', (e) => { e.stopPropagation(); Player.changeVoice(e.target.value); });
     document.getElementById('fsBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.fullscreen(); });
+    const pipBtn = document.getElementById('pipBtn');
+    if (pipBtn) pipBtn.addEventListener('click', (e) => { e.stopPropagation(); Player.togglePip(); });
     document.getElementById('nextEpBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.nextEpisode(); });
     const markBtn = document.getElementById('markCompletedBtn');
     if (markBtn) markBtn.addEventListener('click', (e) => { e.stopPropagation(); this.markCompleted(); });
@@ -165,6 +167,7 @@ const App = {
       else if (e.code === 'ArrowRight') { e.preventDefault(); Player.seekBy(10); }
       else if (e.key === 'f' || e.key === 'F') { Player.fullscreen(); }
       else if (e.key === 'm' || e.key === 'M') { Player.video.muted = !Player.video.muted; }
+      else if (e.key === 'p' || e.key === 'P') { Player.togglePip(); }
       else if (e.key === 's' || e.key === 'S') { Player.skipSegment(); }
     });
 

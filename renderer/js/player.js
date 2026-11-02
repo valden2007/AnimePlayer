@@ -381,6 +381,18 @@ const Player = {
     else w.requestFullscreen();
   },
 
+  async togglePip() {
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await this.video.requestPictureInPicture();
+      }
+    } catch (e) {
+      showToast('PiP недоступен: ' + e.message);
+    }
+  },
+
   nextEpisode() {
     const c = this.current;
     if (!c) return;
