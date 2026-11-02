@@ -143,6 +143,8 @@ const App = {
     document.getElementById('fsBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.fullscreen(); });
     const pipBtn = document.getElementById('pipBtn');
     if (pipBtn) pipBtn.addEventListener('click', (e) => { e.stopPropagation(); Player.togglePip(); });
+    const loadSubBtn = document.getElementById('loadSubBtn');
+    if (loadSubBtn) loadSubBtn.addEventListener('click', (e) => { e.stopPropagation(); Player.loadSubtitleFile(); });
     document.getElementById('nextEpBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.nextEpisode(); });
     const markBtn = document.getElementById('markCompletedBtn');
     if (markBtn) markBtn.addEventListener('click', (e) => { e.stopPropagation(); this.markCompleted(); });
@@ -980,6 +982,37 @@ const App = {
     `;
   },
 
+  renderStatsDetail() {
+    const block = document.getElementById('statsDetail');
+    if (!block) return;
+    const items = Object.values(this.state.library.items || {});
+    const byStatus = { watching: 0, planned: 0, completed: 0, on_hold: 0 };
+    for (const it of items) if (byStatus[it.status] !== undefined) byStatus[it.status]++;
+    const favCount = items.filter(x => x.favorite).length;
+    const prog = Storage.progress();
+    const watchedEps = Object.keys(prog).length;
+    let totalSec = 0;
+    for (const p of Object.values(prog)) totalSec += (p.time || 0);
+    const hours = (totalSec / 3600).toFixed(1);
+    // favorite genres from watched titles
+    const genreCount = {};
+    for (const it of items) {
+      // genres not stored; skip
+    }
+    block.innerHTML = `
+      <div class="stats-block">
+        <div class="stat"><div class="num">${items.length}</div><div class="label">Всего тайтлов</div></div>
+        <div class="stat"><div class="num">${byStatus.watching}</div><div class="label">Смотрю</div></div>
+        <div class="stat"><div class="num">${byStatus.planned}</div><div class="label">В планах</div></div>
+        <div class="stat"><div class="num">${byStatus.completed}</div><div class="label">Просмотрено</div></div>
+        <div class="stat"><div class="num">${byStatus.on_hold}</div><div class="label">Отложено</div></div>
+        <div class="stat"><div class="num">${favCount}</div><div class="label">Избранное</div></div>
+        <div class="stat"><div class="num">${watchedEps}</div><div class="label">Серий начато</div></div>
+        <div class="stat"><div class="num">${hours}</div><div class="label">Часов просмотрено</div></div>
+      </div>
+    `;
+  },
+
   renderLibrary() {
     this.renderStats();
     const tab = document.querySelector('.tab.active')?.dataset.tab || 'all';
@@ -989,16 +1022,22 @@ const App = {
       grid.classList.add('hidden');
       collectionsView.classList.remove('hidden');
       this.renderCollections();
-      // wire create button
       const btn = document.getElementById('createCollectionBtn');
       if (btn) btn.onclick = () => {
         const name = document.getElementById('newCollectionName').value.trim();
         if (name) { this.createCollection(name); document.getElementById('newCollectionName').value = ''; this.renderCollections(); }
       };
       return;
+    } else if (tab === 'stats') {
+      grid.classList.add('hidden');
+      collectionsView.classList.add('hidden');
+      document.getElementById('statsView').classList.remove('hidden');
+      this.renderStatsDetail();
+      return;
     } else {
       grid.classList.remove('hidden');
       collectionsView.classList.add('hidden');
+      document.getElementById('statsView').classList.add('hidden');
     }
     grid.innerHTML = '';
     const q = (document.getElementById('libSearch')?.value || '').toLowerCase();

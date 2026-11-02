@@ -131,6 +131,7 @@
           <select id="subtitleSelect" title="Субтитры">
             <option value="">Без субтитров</option>
           </select>
+          <button id="loadSubBtn" title="Загрузить субтитры">CC</button>
           <select id="speedSelect" title="Скорость">
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>
@@ -169,6 +170,7 @@
         <button class="tab" data-tab="on_hold">Отложено</button>
         <button class="tab" data-tab="favorite">Избранное</button>
         <button class="tab" data-tab="collections">Коллекции</button>
+        <button class="tab" data-tab="stats">Статистика</button>
       </div>
       <div class="filters">
         <input id="libSearch" type="text" placeholder="Поиск в библиотеке">
@@ -184,6 +186,9 @@
           <button id="createCollectionBtn">Создать</button>
         </div>
         <div id="collectionsList"></div>
+      </div>
+      <div id="statsView" class="hidden">
+        <div id="statsDetail"></div>
       </div>
       <h2>Продолжить просмотр</h2>
       <div id="contGrid" class="grid"></div>

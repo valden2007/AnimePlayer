@@ -409,6 +409,31 @@ const Player = {
       video.appendChild(track);
     }
   },
+
+  loadSubtitleFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.vtt,.srt,.txt';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target.result;
+        // convert SRT to VTT if needed
+        let vtt = text;
+        if (file.name.endsWith('.srt')) {
+          vtt = 'WEBVTT\\n\\n' + text.replace(/(\\d+)\\n(\\d{2}:\\d{2}:\\d{2}),(\\d{3}) --> (\\d{2}:\\d{2}:\\d{2}),(\\d{3})/g, '$1\\n$2.$3 --> $4.$5');
+        }
+        const blob = new Blob([vtt], { type: 'text/vtt' });
+        const url = URL.createObjectURL(blob);
+        this.setSubtitle(url);
+        showToast('Субтитры загружены');
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  },
   setSpeed(v) {
     this.video.playbackRate = v;
     Storage.setSettings(Object.assign(Storage.settings(), { speed: v }));
