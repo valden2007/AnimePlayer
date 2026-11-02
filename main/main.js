@@ -135,6 +135,22 @@ function registerIpc() {
         results.push({ name: 'Kitsu', ok: false, status: 0, time: Date.now() - start, count: 0, error: e.message });
       }
     }
+    // AniList
+    {
+      const start = Date.now();
+      try {
+        const r = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'User-Agent': 'AnimePlayer/1.0' },
+          body: JSON.stringify({ query: 'query($s:String){Page(perPage:10){media(search:$s,type:ANIME){id}}}', variables: { s: test } })
+        });
+        const data = await r.json();
+        const arr = data?.data?.Page?.media || [];
+        results.push({ name: 'AniList', ok: r.ok, status: r.status, time: Date.now() - start, count: arr.length, error: r.ok ? '' : `HTTP ${r.status}` });
+      } catch (e) {
+        results.push({ name: 'AniList', ok: false, status: 0, time: Date.now() - start, count: 0, error: e.message });
+      }
+    }
     return { ok: true, data: results };
   });
   ipcMain.handle('openExternal', async (_e, url) => { await shell.openExternal(url); });
