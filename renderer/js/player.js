@@ -148,13 +148,28 @@ const Player = {
     this.upscaleRaf = requestAnimationFrame(() => this.upscaleLoop());
   },
 
-  async load(provider, title, episode, episodes) {
+  async load(provider, title, episode, episodes, voices) {
     const idx = episodes.findIndex(e => e.id === episode.id);
-    this.current = { provider, title, episode, episodes, index: idx >= 0 ? idx : 0 };
+    const voiceList = voices && voices.length ? voices : [{ id: 'anilibria', name: 'AniLibria' }];
+    const savedVoice = (Storage.settings().voices || {})[title.id];
+    let currentVoice = savedVoice && voiceList.find(v => v.id === savedVoice) ? savedVoice : voiceList[0].id;
+    this.current = { provider, title, episode, episodes, index: idx >= 0 ? idx : 0, voices: voiceList, voice: currentVoice };
     this._skippedOpening = false;
     this._skippedEnding = false;
     this._autoNextTriggered = false;
     document.getElementById('epLabel').textContent = `${title.name} — ${episode.name}`;
+
+    const vsel = document.getElementById('voiceSelect');
+    if (vsel) {
+      vsel.innerHTML = '';
+      for (const v of this.current.voices) {
+        const o = document.createElement('option');
+        o.value = v.id; o.textContent = v.name;
+        vsel.appendChild(o);
+      }
+      vsel.value = this.current.voice;
+      vsel.onchange = () => this.changeVoice(vsel.value);
+    }
 
     const sel = document.getElementById('qualitySelect');
     sel.innerHTML = '';
@@ -206,6 +221,8 @@ const Player = {
   },
 
   async playQuality(q) {
+    const voiceObj = this.current.voices && this.current.voices.find(v => v.id === this.current.voice);
+    if (voiceObj && voiceObj.type === 'iframe') return;
     const { provider, episode } = this.current;
     Storage.setSettings(Object.assign(Storage.settings(), { quality: q }));
     let quality = q === 'auto' ? (episode.streams && Object.keys(episode.streams).sort((a,b)=>Number(b)-Number(a))[0]) : q;
@@ -296,6 +313,28 @@ const Player = {
       } else {
         btn.classList.add('hidden');
       }
+    }
+  },
+
+  async changeVoice(voiceId) {
+    if (!this.current) return;
+    const voiceObj = this.current.voices.find(v => v.id === voiceId);
+    this.current.voice = voiceId;
+    const voices = Storage.settings().voices || {};
+    voices[this.current.title.id] = voiceId;
+    Storage.setSettings(Object.assign(Storage.settings(), { voices }));
+    if (voiceObj && voiceObj.type === 'iframe') {
+      document.getElementById('video').classList.add('hidden');
+      const iframe = document.getElementById('iframePlayer');
+      iframe.classList.remove('hidden');
+      if (voiceObj.link) iframe.src = voiceObj.link;
+    } else {
+      document.getElementById('iframePlayer').classList.add('hidden');
+      document.getElementById('video').classList.remove('hidden');
+      const t = this.video.currentTime;
+      await this.playQuality(document.getElementById('qualitySelect').value);
+      this.video.currentTime = t;
+      this.video.play().catch(()=>{});
     }
   },
 

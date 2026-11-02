@@ -1,8 +1,10 @@
 const { AniLibriaStreamProvider } = require('./anilibria');
+const { RutubeStreamProvider } = require('./rutube');
+const { YouTubeStreamProvider } = require('./youtube');
 
 class StreamManager {
   constructor() {
-    this.providers = [new AniLibriaStreamProvider()];
+    this.providers = [new AniLibriaStreamProvider(), new RutubeStreamProvider(), new YouTubeStreamProvider()];
   }
   async getVoices(title, episode) {
     const available = this.providers.filter(p => p.isAvailable());

@@ -25,6 +25,8 @@ function normalizeTitle(r) {
     episodesTotal: r.episodes_total || (Array.isArray(r.episodes) ? r.episodes.length : null),
     rating: r.shikimori?.rating || r.mal?.rating || r.rating?.average || null,
     shikimoriId: r.shikimori?.id || null,
+    rutubeId: r.player?.rutube?.id || null,
+    youtubeId: r.player?.youtube?.id || null,
     type: r.type?.description || r.type?.value || null
   };
 }
@@ -41,6 +43,8 @@ function normalizeEpisode(e, releaseId) {
     duration: e.duration || null,
     opening: e.opening || null,
     ending: e.ending || null,
+    rutubeId: e.rutube_id || null,
+    youtubeId: e.youtube_id || null,
     streams
   };
 }

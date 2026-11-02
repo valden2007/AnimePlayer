@@ -123,6 +123,8 @@ const App = {
       document.getElementById('muteBtn').textContent = Player.video.muted ? '🔇' : '🔊';
     });
     document.getElementById('qualitySelect').addEventListener('change', (e) => { e.stopPropagation(); Player.playQuality(e.target.value); });
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (voiceSelect) voiceSelect.addEventListener('change', (e) => { e.stopPropagation(); Player.changeVoice(e.target.value); });
     document.getElementById('fsBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.fullscreen(); });
     document.getElementById('nextEpBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.nextEpisode(); });
     const markBtn = document.getElementById('markCompletedBtn');
@@ -627,7 +629,10 @@ const App = {
     const item = this.getLibraryItem(title);
     if (!item || !item.status) this.setLibraryItem(title, { status: 'watching' });
     this.showView('player');
-    Player.load(provider, title, episode, episodes, []);
+    const voices = [{ id: 'anilibria', name: 'AniLibria' }];
+    if (episode.rutubeId) voices.push({ id: 'rutube', name: 'Rutube', type: 'iframe', link: 'https://rutube.ru/play/embed/' + episode.rutubeId });
+    if (episode.youtubeId) voices.push({ id: 'youtube', name: 'YouTube', type: 'iframe', link: 'https://www.youtube.com/embed/' + episode.youtubeId });
+    Player.load(provider, title, episode, episodes, voices);
   },
 
   libraryKey(title) {
