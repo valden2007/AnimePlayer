@@ -106,7 +106,6 @@ app.whenReady().then(async () => {
   providers = new ProviderManager(app.getPath('userData'));
   registerIpc();
   createWindow();
-  try { await mainWindow.webContents.session.clearCache(); } catch {}
 
   // auto-updater (only in packaged app)
   autoUpdater.autoDownload = true;

@@ -123,6 +123,8 @@ const App = {
     document.getElementById('qualitySelect').addEventListener('change', (e) => { e.stopPropagation(); Player.playQuality(e.target.value); });
     document.getElementById('fsBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.fullscreen(); });
     document.getElementById('nextEpBtn').addEventListener('click', (e) => { e.stopPropagation(); Player.nextEpisode(); });
+    const markBtn = document.getElementById('markCompletedBtn');
+    if (markBtn) markBtn.addEventListener('click', (e) => { e.stopPropagation(); this.markCompleted(); });
     document.getElementById('prevEp').addEventListener('click', () => Player.prevEpisode());
     document.getElementById('nextEp').addEventListener('click', () => Player.nextEpisode());
 
@@ -151,7 +153,19 @@ const App = {
       else if (e.key === 's' || e.key === 'S') { Player.skipSegment(); }
     });
 
-    Player.onEnded = () => Player.nextEpisode();
+    Player.onEnded = () => {
+      const c = Player.current;
+      if (c && c.index + 1 >= c.episodes.length) {
+        const btn = document.getElementById('markCompletedBtn');
+        if (btn) {
+          btn.classList.remove('hidden');
+          clearTimeout(btn._t);
+          btn._t = setTimeout(() => btn.classList.add('hidden'), 10000);
+        }
+      } else {
+        Player.nextEpisode();
+      }
+    };
   },
 
   async loadFilters() {
@@ -643,6 +657,16 @@ const App = {
     this.setLibraryItem(title, { favorite: item.favorite });
     document.getElementById('favStar').textContent = item.favorite ? '★' : '☆';
     showToast(item.favorite ? 'В избранном' : 'Убрано из избранного');
+  },
+
+  markCompleted() {
+    const title = this.state.currentTitle;
+    if (!title) return;
+    this.setLibraryItem(title, { status: 'completed' });
+    document.getElementById('markCompletedBtn').classList.add('hidden');
+    const statusSelect = document.getElementById('statusSelect');
+    if (statusSelect) statusSelect.value = 'completed';
+    showToast('Отмечено как просмотренное');
   },
 
   setStatus(status) {
