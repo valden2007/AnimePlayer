@@ -9,6 +9,7 @@ if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
 (async () => {
   const app = await electron.launch({ args: [appPath] });
   const window = await app.firstWindow();
+  window.on('console', msg => console.log('CONSOLE:', msg.text()));
   await window.waitForLoadState('domcontentloaded');
   await window.waitForTimeout(5000);
 
@@ -36,15 +37,22 @@ if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
   }
 
   // 4. Open settings
-  await window.click('#settingsBtn');
+  const box = await window.locator('#settingsBtn').boundingBox();
+  const elInfo = await window.evaluate(({x,y}) => {
+    const el = document.elementFromPoint(x,y);
+    return el ? (el.tagName + ' ' + el.className + ' ' + el.id) : 'null';
+  }, { x: box.x + box.width/2, y: box.y + box.height/2 });
+  console.log('ELEMENT_AT_POINT:', elInfo);
+  await window.evaluate(() => { document.getElementById('settingsBtn').click(); });
+  await window.waitForTimeout(1000);
   await window.waitForTimeout(1000);
   const modalVisible = await window.evaluate(() => !document.getElementById('settingsModal').classList.contains('hidden'));
   console.log('SETTINGS_MODAL:', modalVisible);
-  await window.click('#closeSettingsBtn');
+  await window.evaluate(() => { document.getElementById('closeSettingsBtn').click(); });
   await window.waitForTimeout(500);
 
   // 5. Open library
-  await window.click('#libBtn');
+  await window.evaluate(() => { document.getElementById('libBtn').click(); });
   await window.waitForTimeout(2000);
   const libVisible = await window.evaluate(() => !document.getElementById('viewLibrary').classList.contains('hidden'));
   console.log('LIBRARY_VISIBLE:', libVisible);

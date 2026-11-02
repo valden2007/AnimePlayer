@@ -1,3 +1,4 @@
+console.log('app.js file loaded');
 /**
  * Main application controller.
  * @namespace App
@@ -26,9 +27,13 @@ const App = {
   },
 
   async init() {
+    window.__appInitCalled = true;
+    console.log('App.init started');
     this.applyTheme();
     Player.init();
+    console.log('Player.init done');
     const list = await API.providers();
+    console.log('providers loaded:', list.length);
     const sel = document.getElementById('providerSelect');
     sel.innerHTML = '';
     for (const p of list) {
@@ -73,6 +78,8 @@ const App = {
   },
 
   bindEvents() {
+    try {
+    window.__bindEventsCalled = true;
     document.getElementById('logo').addEventListener('click', () => this.showView('home'));
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', (e) => {
@@ -101,7 +108,9 @@ const App = {
     const backFromLib = document.getElementById('backFromLib');
     if (backFromLib) backFromLib.addEventListener('click', () => this.showView('home'));
 
-    document.getElementById('settingsBtn').addEventListener('click', () => this.openSettings());
+    const sb = document.getElementById('settingsBtn');
+    console.log('binding settingsBtn, exists:', !!sb);
+    if (sb) sb.addEventListener('click', () => { console.log('settingsBtn clicked'); this.openSettings(); });
     document.getElementById('libBtn').addEventListener('click', () => this.showView('library'));
     const continueBtn = document.getElementById('continueBtn');
     if (continueBtn) continueBtn.addEventListener('click', () => this.continueWatching());
@@ -154,7 +163,7 @@ const App = {
     if (libSort) libSort.addEventListener('change', () => this.renderLibrary());
 
     // hotkeys
-    document.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const modal = document.getElementById('settingsModal');
         if (modal && !modal.classList.contains('hidden')) {
@@ -187,6 +196,7 @@ const App = {
         Player.nextEpisode();
       }
     };
+    } catch (e) { console.error('bindEvents error:', e); }
   },
 
   async loadFilters() {
@@ -1080,4 +1090,9 @@ function showToast(msg) {
 window.showToast = showToast;
 window.App = App;
 
-document.addEventListener('DOMContentLoaded', () => App.init());
+console.log('app.js loaded, readyState:', document.readyState);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+  App.init();
+}

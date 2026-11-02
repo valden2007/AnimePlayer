@@ -157,8 +157,6 @@ if (!gotLock) {
 }
 
 app.whenReady().then(async () => {
-  const fs = require('fs');
-  fs.writeFileSync('C:/Users/PC/AppData/Local/Temp/opencode/main_start.log', 'STARTED\n', 'utf-8');
   providers = new ProviderManager(app.getPath('userData'));
   registerIpc();
   createWindow();
