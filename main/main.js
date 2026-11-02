@@ -123,6 +123,18 @@ function registerIpc() {
         results.push({ name: 'Jikan', ok: false, status: 0, time: Date.now() - start, count: 0, error: e.message });
       }
     }
+    // Kitsu
+    {
+      const start = Date.now();
+      try {
+        const r = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(test)}&page[limit]=10`, { headers: { 'Accept': 'application/vnd.api+json', 'User-Agent': 'AnimePlayer/1.0' } });
+        const data = await r.json();
+        const arr = data?.data || [];
+        results.push({ name: 'Kitsu', ok: r.ok, status: r.status, time: Date.now() - start, count: arr.length, error: r.ok ? '' : `HTTP ${r.status}` });
+      } catch (e) {
+        results.push({ name: 'Kitsu', ok: false, status: 0, time: Date.now() - start, count: 0, error: e.message });
+      }
+    }
     return { ok: true, data: results };
   });
   ipcMain.handle('openExternal', async (_e, url) => { await shell.openExternal(url); });
