@@ -1,5 +1,6 @@
 const { AniLibriaProvider } = require('./anilibria');
 const { ShikimoriProvider } = require('./shikimori');
+const { JikanProvider } = require('./jikan');
 const { AniLibriaIndexer } = require('./indexer');
 const { initDiskCache } = require('./http');
 
@@ -10,7 +11,7 @@ const { initDiskCache } = require('./http');
 class ProviderManager {
   constructor(userDataPath) {
     initDiskCache(userDataPath);
-    this.providers = [new AniLibriaProvider(), new ShikimoriProvider()];
+    this.providers = [new AniLibriaProvider(), new ShikimoriProvider(), new JikanProvider()];
     this.indexer = new AniLibriaIndexer(userDataPath);
     setTimeout(() => this.indexer.ensure().catch(() => {}), 5000);
   }
