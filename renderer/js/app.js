@@ -159,6 +159,7 @@ const App = {
         const modal = document.getElementById('settingsModal');
         if (modal && !modal.classList.contains('hidden')) {
           modal.classList.add('hidden');
+          document.getElementById('settingsBtn').focus();
           return;
         }
       }
@@ -850,7 +851,10 @@ const App = {
       ns.skipSeconds = Number(document.getElementById('skipSecondsInput').value) || 85;
       Storage.setSettings(ns);
     };
-    document.getElementById('closeSettingsBtn').onclick = () => modal.classList.add('hidden');
+    document.getElementById('closeSettingsBtn').onclick = () => {
+      modal.classList.add('hidden');
+      document.getElementById('settingsBtn').focus();
+    };
     document.getElementById('diagSourcesBtn').onclick = async () => {
       const out = document.getElementById('diagOutput');
       out.textContent = 'Проверка...';
