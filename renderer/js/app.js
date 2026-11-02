@@ -343,7 +343,6 @@ const App = {
       const opts = { limit: 12, page: this.state.newestPage, sorting: 'FRESH_AT_DESC', status: 'all', yearFrom: String(curY - 1), yearTo: String(curY) };
       const r = await API.catalog(this.state.provider, opts);
       let items = r.data || [];
-      const curY = new Date().getFullYear();
       items = items.filter(t => !t.year || (t.year >= curY - 1 && t.year <= curY));
       const grid = document.getElementById('newestGrid');
       this.renderGridAppend(grid, items);
@@ -385,7 +384,7 @@ const App = {
       card.dataset.provider = t.provider || this.state.provider;
       card.dataset.id = t.id;
       card.innerHTML = `
-        <img src="${t.poster || ''}" alt="" loading="lazy">
+        <img src="${t.poster || ''}" alt="" loading="lazy" decoding="async">
         ${t.hasStream ? '<span class="badge-stream">Есть серии</span>' : ''}
         <div class="info">
           <div class="title">${escapeHtml(t.name)}</div>
@@ -417,7 +416,7 @@ const App = {
       card.dataset.provider = t.provider || this.state.provider;
       card.dataset.id = t.id;
       card.innerHTML = `
-        <img src="${t.poster || ''}" alt="" loading="lazy">
+        <img src="${t.poster || ''}" alt="" loading="lazy" decoding="async">
         ${t.hasStream ? '<span class="badge-stream">Есть серии</span>' : ''}
         <div class="info">
           <div class="title">${escapeHtml(t.name)}</div>
@@ -509,7 +508,9 @@ const App = {
       document.getElementById('providerSelect').value = prov;
       const title = t.data;
       document.getElementById('titleName').textContent = title.name;
+      document.getElementById('titleName').classList.remove('skeleton-text');
       document.getElementById('titlePoster').src = title.poster || '';
+      document.getElementById('titlePoster').classList.remove('skeleton');
       document.getElementById('titleDesc').textContent = title.description || '';
       document.getElementById('titleMeta').textContent = [title.year, title.type, title.status, title.rating ? `★ ${title.rating}` : ''].filter(Boolean).join(' • ');
       document.getElementById('titleGenres').innerHTML = (title.genres || []).map(g => `<span>${escapeHtml(g)}</span>`).join('');

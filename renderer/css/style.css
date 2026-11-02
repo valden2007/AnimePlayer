@@ -60,6 +60,8 @@ main { padding: 20px; max-width: 1400px; margin: 0 auto; }
 .backbtn { margin-bottom: 16px; }
 .title-layout { display: flex; gap: 24px; flex-wrap: wrap; }
 .poster { width: 260px; border-radius: 10px; aspect-ratio: 2/3; object-fit: cover; background: var(--bg2); }
+.skeleton { background: linear-gradient(90deg, var(--bg2), var(--hover), var(--bg2)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+.skeleton-text { height: 28px; width: 60%; border-radius: 6px; background: linear-gradient(90deg, var(--bg2), var(--hover), var(--bg2)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
 .title-info { flex: 1; min-width: 300px; }
 .title-info h1 { margin: 0 0 8px; }
 .meta { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
