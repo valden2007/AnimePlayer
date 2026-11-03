@@ -300,6 +300,7 @@ const App = {
         let items = r.data || [];
         items = items.filter(t => !t.year || (t.year >= curY - 1 && t.year <= curY));
         this.renderGrid(newestGrid, items);
+        if (r.partial) showToast('Офлайн-результаты (кэш)');
         this.state.newestHasMore = (r.data || []).length >= 12;
         const btnN = document.getElementById('loadMoreNewest');
         btnN.classList.toggle('hidden', !this.state.newestHasMore);
@@ -549,6 +550,7 @@ const App = {
       } else {
         this.renderGrid(grid, items);
       }
+      if (r.partial) showToast('Офлайн-результаты (кэш)');
       if (r.provider && r.provider !== this.state.provider) {
         this.state.provider = r.provider;
         document.getElementById('providerSelect').value = r.provider;

@@ -61,8 +61,37 @@ class ProviderManager {
     for (const p of this._order(preferredId)) {
       try {
         const data = await p.search(query, page);
-        return { provider: p.id, data };
+        return { provider: p.id, data, partial: false };
       } catch (e) { errs.push(`${p.name}: ${e.message}`); }
+    }
+    // Fallback: offline index for anilibria
+    if (preferredId === 'anilibria' || !preferredId) {
+      await this.indexer.ensure();
+      if (this.indexer.ready && this.indexer.entries.length) {
+        const q = (query || '').toLowerCase().trim();
+        const matched = this.indexer.entries.filter(e => {
+          return e.names.some(n => n.includes(q));
+        }).slice(0, 30).map(e => ({
+          id: e.id,
+          alias: null,
+          provider: 'anilibria',
+          name: e.names[0] || 'Без названия',
+          nameEn: null,
+          poster: null,
+          description: '',
+          genres: [],
+          year: e.year,
+          status: e.hasStream ? 'Онгоинг' : 'Завершён',
+          episodesTotal: e.episodes,
+          rating: null,
+          type: e.type,
+          hasStream: e.hasStream,
+          anilibriaId: e.id
+        }));
+        if (matched.length) {
+          return { provider: 'anilibria', data: matched, partial: true };
+        }
+      }
     }
     throw new Error('Поиск недоступен. ' + errs.join(' | '));
   }
@@ -123,8 +152,44 @@ class ProviderManager {
         } else {
           out = data.map(t => Object.assign({}, t, { hasStream: true, anilibriaId: t.id }));
         }
-        return { provider: p.id, data: out };
+        return { provider: p.id, data: out, partial: false };
       } catch (e) { errs.push(`${p.name}: ${e.message}`); }
+    }
+    // Fallback: offline index for anilibria
+    if (preferredId === 'anilibria' || !preferredId) {
+      await this.indexer.ensure();
+      if (this.indexer.ready && this.indexer.entries.length) {
+        let entries = [...this.indexer.entries];
+        // filter by genre? index has no genres, skip
+        if (opts.yearFrom) entries = entries.filter(e => !e.year || e.year >= Number(opts.yearFrom));
+        if (opts.yearTo) entries = entries.filter(e => !e.year || e.year <= Number(opts.yearTo));
+        if (opts.onlyWithStream) entries = entries.filter(e => e.hasStream);
+        // sort
+        if (opts.sorting === 'RATING_DESC') entries.sort((a,b) => (b.id||0)-(a.id||0));
+        else entries.sort((a,b) => (b.year||0)-(a.year||0) || (b.id||0)-(a.id||0));
+        const page = opts.page || 1;
+        const limit = opts.limit || 20;
+        const start = (page - 1) * limit;
+        const sliced = entries.slice(start, start + limit);
+        const out = sliced.map(e => ({
+          id: e.id,
+          alias: null,
+          provider: 'anilibria',
+          name: e.names[0] || 'Без названия',
+          nameEn: null,
+          poster: null,
+          description: '',
+          genres: [],
+          year: e.year,
+          status: e.hasStream ? 'Онгоинг' : 'Завершён',
+          episodesTotal: e.episodes,
+          rating: null,
+          type: e.type,
+          hasStream: e.hasStream,
+          anilibriaId: e.id
+        }));
+        return { provider: 'anilibria', data: out, partial: true };
+      }
     }
     throw new Error('Каталог недоступен. ' + errs.join(' | '));
   }
