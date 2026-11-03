@@ -1,4 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
+// Enable GPU acceleration for video rendering
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');

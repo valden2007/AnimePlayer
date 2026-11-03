@@ -78,7 +78,7 @@ const Player = {
       return;
     }
     const vs = `attribute vec2 a_position; attribute vec2 a_texCoord; varying vec2 v_texCoord; void main(){ gl_Position=vec4(a_position,0,1); v_texCoord=a_texCoord; }`;
-    const fs = `precision mediump float; varying vec2 v_texCoord; uniform sampler2D u_image; uniform vec2 u_resolution; uniform float u_strength; void main(){ vec2 px=1.0/u_resolution; vec4 c=texture2D(u_image,v_texCoord); vec4 l=texture2D(u_image,v_texCoord-vec2(px.x,0)); vec4 r=texture2D(u_image,v_texCoord+vec2(px.x,0)); vec4 u=texture2D(u_image,v_texCoord-vec2(0,px.y)); vec4 d=texture2D(u_image,v_texCoord+vec2(0,px.y)); vec4 lap=l+r+u+d-4.0*c; gl_FragColor=c-lap*u_strength; }`;
+    const fs = `precision mediump float; varying vec2 v_texCoord; uniform sampler2D u_image; uniform vec2 u_resolution; uniform float u_strength; void main(){ vec2 px=1.0/u_resolution; vec4 c=texture2D(u_image,v_texCoord); vec4 tl=texture2D(u_image,v_texCoord+vec2(-px.x,-px.y)); vec4 t=texture2D(u_image,v_texCoord+vec2(0,-px.y)); vec4 tr=texture2D(u_image,v_texCoord+vec2(px.x,-px.y)); vec4 l=texture2D(u_image,v_texCoord+vec2(-px.x,0)); vec4 r=texture2D(u_image,v_texCoord+vec2(px.x,0)); vec4 bl=texture2D(u_image,v_texCoord+vec2(-px.x,px.y)); vec4 b=texture2D(u_image,v_texCoord+vec2(0,px.y)); vec4 br=texture2D(u_image,v_texCoord+vec2(px.x,px.y)); vec4 lap=(tl+t+tr+l+r+bl+b+br-8.0*c); gl_FragColor=clamp(c-lap*u_strength,0.0,1.0); }`;
     const prog = gl.createProgram();
     const vsh = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vsh, vs); gl.compileShader(vsh);
     const fsh = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fsh, fs); gl.compileShader(fsh);
@@ -127,16 +127,20 @@ const Player = {
       this.upscaleRaf = requestAnimationFrame(() => this.upscaleLoop());
       return;
     }
-    const w = video.videoWidth || canvas.width || 640;
-    const h = video.videoHeight || canvas.height || 360;
+    const scale = this.upscaleMode === 'strong' ? 2 : 1;
+    const w = (video.videoWidth || 640) * scale;
+    const h = (video.videoHeight || 360) * scale;
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    gl.viewport(0,0,w,h);
     gl.viewport(0,0,w,h);
     gl.useProgram(this.upscaleProgram);
     gl.bindTexture(gl.TEXTURE_2D, this.upscaleTexture);
     try { gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video); } catch {}
     const strength = this.upscaleMode === 'strong' ? 0.6 : 0.3;
+    const vw = video.videoWidth || 640;
+    const vh = video.videoHeight || 360;
     gl.uniform1f(gl.getUniformLocation(this.upscaleProgram,'u_strength'), strength);
-    gl.uniform2f(gl.getUniformLocation(this.upscaleProgram,'u_resolution'), w, h);
+    gl.uniform2f(gl.getUniformLocation(this.upscaleProgram,'u_resolution'), vw, vh);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     const now = performance.now();
     this.upscaleFps.push(now);
