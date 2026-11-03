@@ -117,7 +117,6 @@
       <div class="player-wrap" id="playerWrap">
         <video id="video" playsinline crossorigin="anonymous"></video>
         <iframe id="iframePlayer" class="hidden" allowfullscreen></iframe>
-        <canvas id="upscaleCanvas" class="hidden"></canvas>
         <div class="play-icon hidden" id="playIcon">▶</div>
         <button id="skipBtn" class="skip-btn hidden">Пропустить</button>
         <div class="controls" id="controlsBar">
@@ -139,11 +138,7 @@
             <option value="1.5">1.5x</option>
             <option value="2">2x</option>
           </select>
-          <select id="upscaleSelect" title="Базовое улучшение (WebGL). Не полноценный Anime4K.">
-            <option value="off">Улучшение: выкл</option>
-            <option value="light">Улучшение: лёгкий</option>
-            <option value="strong">Улучшение: сильный</option>
-          </select>
+
           <button id="nextEpBtn">След. серия</button>
           <button id="markCompletedBtn" class="hidden">Отметить просмотренным</button>
           <button id="fsBtn" aria-label="Полный экран">⛶</button>

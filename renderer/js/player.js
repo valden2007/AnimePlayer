@@ -5,14 +5,6 @@ const Player = {
   onEnded: null,
   clickTimer: null,
   hideTimer: null,
-  upscaleMode: 'off',
-  gl: null,
-  upscaleProgram: null,
-  upscaleCanvas: null,
-  upscaleTexture: null,
-  upscaleRaf: null,
-  upscaleFps: [],
-  _resizeObserver: null,
 
   init() {
     this.video = document.getElementById('video');
@@ -43,16 +35,12 @@ const Player = {
     // auto-hide controls
     wrap.addEventListener('mousemove', () => this.resetHideTimer());
     wrap.addEventListener('mouseleave', () => this.resetHideTimer());
-    document.addEventListener('fullscreenchange', () => { this.resetHideTimer(); this.syncCanvasSize(); });
+    document.addEventListener('fullscreenchange', () => this.resetHideTimer());
 
-    const ups = document.getElementById('upscaleSelect');
-    if (ups) ups.addEventListener('change', (e) => this.setUpscale(e.target.value));
     const speedSel = document.getElementById('speedSelect');
     if (speedSel) speedSel.addEventListener('change', (e) => this.setSpeed(parseFloat(e.target.value)));
     const subSel = document.getElementById('subtitleSelect');
     if (subSel) subSel.addEventListener('change', (e) => this.setSubtitle(e.target.value));
-
-    this.initUpscale();
   },
 
   resetHideTimer() {
@@ -70,139 +58,6 @@ const Player = {
     icon.classList.add('show');
     clearTimeout(this._iconTimer);
     this._iconTimer = setTimeout(() => icon.classList.remove('show'), 600);
-  },
-
-  // --- upscale (WebGL) ---
-  initUpscale() {
-    this.upscaleCanvas = document.getElementById('upscaleCanvas');
-    const gl = this.upscaleCanvas.getContext('webgl2') || this.upscaleCanvas.getContext('webgl');
-    this.gl = gl;
-    if (!gl) {
-      const sel = document.getElementById('upscaleSelect');
-      if (sel) { sel.disabled = true; sel.title = 'WebGL недоступен'; }
-      return;
-    }
-    const vs = 'attribute vec2 a_position; attribute vec2 a_texCoord; varying vec2 v_texCoord; void main(){ gl_Position=vec4(a_position,0,1); v_texCoord=a_texCoord; }';
-    const fs = 'precision mediump float; varying vec2 v_texCoord; uniform sampler2D u_image; uniform vec2 u_resolution; uniform float u_strength; void main(){ vec2 px=1.0/u_resolution; vec4 c=texture2D(u_image,v_texCoord); vec4 tl=texture2D(u_image,v_texCoord+vec2(-px.x,-px.y)); vec4 t=texture2D(u_image,v_texCoord+vec2(0,-px.y)); vec4 tr=texture2D(u_image,v_texCoord+vec2(px.x,-px.y)); vec4 l=texture2D(u_image,v_texCoord+vec2(-px.x,0)); vec4 r=texture2D(u_image,v_texCoord+vec2(px.x,0)); vec4 bl=texture2D(u_image,v_texCoord+vec2(-px.x,px.y)); vec4 b=texture2D(u_image,v_texCoord+vec2(0,px.y)); vec4 br=texture2D(u_image,v_texCoord+vec2(px.x,px.y)); vec4 lap=(tl+t+tr+l+r+bl+b+br-8.0*c); gl_FragColor=clamp(c-lap*u_strength,0.0,1.0); }';
-    const prog = gl.createProgram();
-    const vsh = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vsh, vs); gl.compileShader(vsh);
-    const fsh = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fsh, fs); gl.compileShader(fsh);
-    gl.attachShader(prog, vsh); gl.attachShader(prog, fsh); gl.linkProgram(prog);
-    this.upscaleProgram = prog;
-    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,0,1, 1,-1,1,1, -1,1,0,0, 1,1,1,0]), gl.STATIC_DRAW);
-    const pos = gl.getAttribLocation(prog, 'a_position'); const tc = gl.getAttribLocation(prog, 'a_texCoord');
-    gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 16, 0);
-    gl.enableVertexAttribArray(tc); gl.vertexAttribPointer(tc, 2, gl.FLOAT, false, 16, 8);
-    this.upscaleTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.upscaleTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-    // ResizeObserver for canvas sync
-    this.syncCanvasSize();
-    const wrap = document.getElementById('playerWrap');
-    if (typeof ResizeObserver !== 'undefined') {
-      this._resizeObserver = new ResizeObserver(() => this.syncCanvasSize());
-      this._resizeObserver.observe(wrap);
-    } else {
-      window.addEventListener('resize', () => this.syncCanvasSize());
-      document.addEventListener('fullscreenchange', () => this.syncCanvasSize());
-    }
-  },
-
-  syncCanvasSize() {
-    if (!this.gl || !this.upscaleCanvas) return;
-    const wrap = document.getElementById('playerWrap');
-    const dpr = window.devicePixelRatio || 1;
-    const cssW = wrap.clientWidth || 640;
-    const cssH = wrap.clientHeight || 360;
-    const expectedW = Math.round(cssW * dpr);
-    const expectedH = Math.round(cssH * dpr);
-    const canvas = this.upscaleCanvas;
-    // Invariant check
-    if (canvas.width !== expectedW || canvas.height !== expectedH) {
-      console.warn('Canvas size mismatch: expected', expectedW, expectedH, 'got', canvas.width, canvas.height);
-      canvas.width = expectedW;
-      canvas.height = expectedH;
-    }
-    const gl = this.gl;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    this._lastCanvasSize = { w: canvas.width, h: canvas.height, cssW, cssH, dpr };
-  },
-
-  setUpscale(mode) {
-    this.upscaleMode = mode;
-    if (mode === 'off') {
-      if (this.upscaleRaf) cancelAnimationFrame(this.upscaleRaf);
-      this.upscaleRaf = null;
-      document.getElementById('upscaleCanvas').classList.add('hidden');
-      document.getElementById('video').classList.remove('hidden');
-      document.getElementById('video').style.opacity = '1';
-      return;
-    }
-    if (!this.gl) {
-      showToast('Улучшение недоступно (нет WebGL)');
-      document.getElementById('upscaleSelect').value = 'off';
-      return;
-    }
-    document.getElementById('video').style.opacity = '0';
-    document.getElementById('upscaleCanvas').classList.remove('hidden');
-    this.syncCanvasSize();
-    this.upscaleFps = [];
-    this.upscaleLoop();
-  },
-
-  upscaleLoop() {
-    const gl = this.gl;
-    const video = this.video;
-    const canvas = this.upscaleCanvas;
-    if (!video || video.paused || video.ended) {
-      this.upscaleRaf = requestAnimationFrame(() => this.upscaleLoop());
-      return;
-    }
-    const vw = video.videoWidth || 640;
-    const vh = video.videoHeight || 360;
-    this.syncCanvasSize();
-    const cw = canvas.width;
-    const ch = canvas.height;
-    const containerAspect = cw / ch;
-    const videoAspect = vw / vh;
-    let vpW, vpH, vpX, vpY;
-    if (containerAspect > videoAspect) {
-      vpH = ch;
-      vpW = Math.round(vpH * videoAspect);
-      vpX = Math.round((cw - vpW) / 2);
-      vpY = 0;
-    } else {
-      vpW = cw;
-      vpH = Math.round(vpW / videoAspect);
-      vpX = 0;
-      vpY = Math.round((ch - vpH) / 2);
-    }
-    gl.viewport(vpX, vpY, vpW, vpH);
-    gl.useProgram(this.upscaleProgram);
-    gl.bindTexture(gl.TEXTURE_2D, this.upscaleTexture);
-    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video); } catch {}
-    const strength = this.upscaleMode === 'strong' ? 0.6 : 0.3;
-    gl.uniform1f(gl.getUniformLocation(this.upscaleProgram, 'u_strength'), strength);
-    gl.uniform2f(gl.getUniformLocation(this.upscaleProgram, 'u_resolution'), vw, vh);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    const now = performance.now();
-    this.upscaleFps.push(now);
-    while (this.upscaleFps.length && now - this.upscaleFps[0] > 2000) this.upscaleFps.shift();
-    if (this.upscaleFps.length > 60) {
-      const fps = (this.upscaleFps.length - 1) / ((now - this.upscaleFps[0]) / 1000);
-      if (fps < 20) {
-        showToast('Улучшение отключено: низкий FPS');
-        this.setUpscale('off');
-        document.getElementById('upscaleSelect').value = 'off';
-        return;
-      }
-    }
-    this.upscaleRaf = requestAnimationFrame(() => this.upscaleLoop());
   },
 
   async load(provider, title, episode, episodes, voices) {
@@ -266,7 +121,6 @@ const Player = {
     const savedVol = Storage.settings().volume;
     if (typeof savedVol === 'number') this.video.volume = savedVol;
     this.resetHideTimer();
-    if (this.upscaleMode !== 'off') this.syncCanvasSize();
   },
 
   async playQuality(q) {
